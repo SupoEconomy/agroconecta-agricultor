@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AgroConecta Agricultor · Quillabamba</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#070A0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="icon-192.png">
+
+  <!-- Google Fonts: Bricolage Grotesque & Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #070A0F;
+      --surface: #0D141D;
+      --surface2: #111A25;
+      --surface3: #182332;
+      --neon: #00FF66;
+      --neon-glow: rgba(0, 255, 102, 0.35);
+      --amber: #FFC24B;
+      --amber-glow: rgba(255, 194, 75, 0.3);
+      --ink: #E9F3ED;
+      --muted: #8E9FA5;
+      --border: rgba(0, 255, 102, 0.18);
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --danger: #FF4D4D;
+      --font-display: 'Bricolage Grotesque', sans-serif;
+      --font-body: 'Instrument Sans', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BARRA SUPERIOR */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 20, 29, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .topbar-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 255, 102, 0.05));
+      border: 1.5px solid var(--neon);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 12px var(--neon-glow);
+    }
+
+    .brand-logo span {
+      font-size: 16px;
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .brand-text h1 span {
+      color: var(--neon);
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .signal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      padding: 5px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .signal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 8px var(--neon);
+    }
+
+    .signal-dot.slow {
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
+    }
+
+    .signal-dot.offline {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    /* BOTÓN PERMANENTE DE ACTUALIZACIÓN GITHUB */
+    .btn-github-update {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0, 255, 102, 0.12);
+      border: 1.5px solid var(--neon);
+      color: var(--neon);
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-github-update:hover {
+      background: var(--neon);
+      color: #000;
+      box-shadow: 0 0 16px var(--neon-glow);
+    }
+
+    .update-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--neon);
+      animation: pulseDot 1.4s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--neon); }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+
+    .topbar-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .lang-selector {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      outline: none;
+      cursor: pointer;
+      flex: 1;
+      max-width: 170px;
+    }
+
+    .btn-voice-header {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      color: var(--ink);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-voice-header:hover, .btn-voice-header.active {
+      border-color: var(--neon);
+      color: var(--neon);
+    }
+
+    /* CONTENEDOR PRINCIPAL Y VISTAS */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      min-height: calc(100dvh - 120px);
+    }
+
+    .sidebar {
+      display: none;
+      width: 250px;
+      background: var(--surface);
+      border-right: 1px solid var(--border-soft);
+      padding: 20px 14px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 16px 16px 90px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view-pane {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .view-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BARRA DE NAVEGACIÓN INFERIOR (MÓVIL) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(13, 20, 29, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1.5px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      height: 72px;
+      padding: 0 4px;
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-btn .nav-icon {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-btn.active {
+      color: var(--neon);
+    }
+
+    .nav-btn.active .nav-icon {
+      transform: translateY(-2px) scale(1.1);
+    }
+
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 32px;
+      height: 3px;
+      background: var(--neon);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 8px var(--neon);
+    }
+
+    /* TARJETAS Y CONTROLES */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .card-tech {
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action-lg {
+      min-height: 54px;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .btn-neon {
+      background: var(--neon);
+      color: #05140A;
+      box-shadow: 0 4px 18px var(--neon-glow);
+    }
+
+    .btn-neon:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px var(--neon-glow);
+    }
+
+    .btn-amber {
+      background: var(--amber);
+      color: #1A1203;
+      box-shadow: 0 4px 18px var(--amber-glow);
+    }
+
+    .btn-outline {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--neon);
+      color: var(--neon);
+    }
+
+    /* VISOR 3D DE PARCELA */
+    .parcel-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: radial-gradient(circle at center, #111e2e 0%, #080d14 100%);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+
+    #parcelCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    .parcel-controls {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .control-cluster {
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .btn-ctrl {
+      width: 42px;
+      height: 42px;
+      background: rgba(13, 20, 29, 0.85);
+      border: 1px solid var(--border);
+      color: var(--neon);
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-ctrl:hover {
+      background: var(--neon);
+      color: #000;
+    }
+
+    .parcel-legend {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(13, 20, 29, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    /* LISTA DE PRODUCTOS ACTIVOS */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .product-card {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .product-card.public {
+      border-left: 4px solid var(--neon);
+    }
+
+    .product-card.private {
+      border-left: 4px solid var(--muted);
+    }
+
+    .product-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .product-badge {
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 100px;
+      font-weight: 700;
+    }
+
+    .badge-neon {
+      background: rgba(0, 255, 102, 0.15);
+      color: var(--neon);
+    }
+
+    .badge-amber {
+      background: rgba(255, 194, 75, 0.15);
+      color: var(--amber);
+    }
+
+    .product-detail {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .product-price-tag {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--neon);
+    }
+
+    .product-actions-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-prod-sm {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-soft);
+      background: var(--surface);
+      color: var(--ink);
+      text-align: center;
+    }
+
+    .btn-prod-sm:hover {
+      border-color: var(--neon);
+      color: var(--neon);
+    }
+
+    /* VENTAS Y PEDIDOS */
+    .market-banner {
+      background: linear-gradient(90deg, rgba(255, 194, 75, 0.12), rgba(0, 255, 102, 0.08));
+      border: 1px solid rgba(255, 194, 75, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      overflow-x: auto;
+    }
+
+    .market-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .market-crop {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .market-val {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--amber);
+    }
+
+    .sales-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .summary-box {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .summary-period {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .summary-amount {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--neon);
+    }
+
+    .order-item {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .order-item.confirmed {
+      border-color: rgba(0, 255, 102, 0.3);
+    }
+
+    .order-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-buyer {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .order-detail {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* CHAT INTERNO */
+    .chat-categories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .chat-cat-tab {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      color: var(--muted);
+      padding: 10px 4px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .chat-cat-tab.active {
+      background: var(--surface3);
+      border-color: var(--neon);
+      color: var(--neon);
+    }
+
+    .contacts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .contact-card {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .contact-card:hover, .contact-card.active {
+      border-color: var(--neon);
+      background: var(--surface3);
+    }
+
+    .contact-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .contact-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #192736;
+      border: 1.5px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .online-indicator {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--neon);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      box-shadow: 0 0 6px var(--neon);
+    }
+
+    .online-indicator.offline {
+      background: var(--muted);
+      box-shadow: none;
+    }
+
+    .contact-text h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .contact-text p {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .chat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      height: 420px;
+    }
+
+    .chat-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message-bubble {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .message-bubble.mine {
+      align-self: flex-end;
+      background: rgba(0, 255, 102, 0.18);
+      border: 1px solid rgba(0, 255, 102, 0.35);
+      color: var(--ink);
+      border-bottom-right-radius: 2px;
+    }
+
+    .message-bubble.theirs {
+      align-self: flex-start;
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      color: var(--ink);
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-input-bar {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+    }
+
+    .chat-input-field {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      color: var(--ink);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .chat-input-field:focus {
+      border-color: var(--neon);
+    }
+
+    .btn-chat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      background: var(--surface);
+      color: var(--neon);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-chat-icon.dictate.listening {
+      background: var(--danger);
+      color: #fff;
+      animation: pulseDot 1s infinite;
+    }
+
+    /* AUTO-UPDATER & ACTUALIZACIONES */
+    .updater-card {
+      background: var(--surface);
+      border: 1.5px solid var(--neon);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: 0 0 24px var(--neon-glow);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 14px 0 8px;
+      display: none;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--amber), var(--neon));
+      transition: width 0.3s ease;
+    }
+
+    .changelog-box {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+
+    /* MODALES GRANDES PARA EL AGRICULTOR */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1.5px solid var(--neon);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-close-modal {
+      background: var(--surface2);
+      border: 1px solid var(--border-soft);
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input, .form-select {
+      background: var(--surface2);
+      border: 1.5px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      font-size: 15px;
+      padding: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--neon);
+    }
+
+    .stepper-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-step {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--neon);
+      font-size: 24px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      cursor: pointer;
+    }
+
+    /* ESCRITORIO ADAPTADO */
+    @media (min-width: 769px) {
+      .bottom-nav {
+        display: none;
+      }
+      .sidebar {
+        display: flex;
+      }
+      .main-content {
+        padding: 24px 32px;
+      }
+      .topbar {
+        padding: 14px 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR -->
+  <header class="topbar">
+    <div class="topbar-main">
+      <a href="#view-parcela" class="brand-box">
+        <div class="brand-logo">
+          <span>🌱</span>
+        </div>
+        <div class="brand-text">
+          <h1>AGRO<span>CONECTA</span></h1>
+          <div class="brand-sub">Valle de La Convención · Cusco</div>
+        </div>
+      </a>
+
+      <div class="topbar-actions">
+        <!-- Semáforo de Señal Offline -->
+        <div class="signal-pill" id="signalPill" title="Estado de conectividad del campo">
+          <span class="signal-dot" id="signalDot"></span>
+          <span id="signalText">Conectado</span>
+        </div>
+
+        <!-- Botón Permanente Auto-Updater GitHub Supoeconomy -->
+        <button type="button" class="btn-github-update" id="btnGithubUpdate" title="Repositorio Supoeconomy en GitHub">
+          <span class="update-badge-dot"></span>
+          <span id="githubUpdateLabel">v1.0.0 · 🔄 Actualizar</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="topbar-strip">
+      <!-- Selector de Idioma Intercultural -->
+      <select id="appLang" class="lang-selector" aria-label="Idioma">
+        <option value="es">Castellano</option>
+        <option value="qu">Quechua Sureño (Beta)</option>
+        <option value="ash">Asháninka (Beta)</option>
+      </select>
+
+      <!-- Botón de Asistente de Voz Femenina -->
+      <button type="button" class="btn-voice-header" id="btnGlobalVoice">
+        <span>🔊</span> <span id="lblVoiceBtn">Escuchar Pantalla</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <!-- BARRA LATERAL (ESCRITORIO) -->
+    <aside class="sidebar">
+      <button type="button" class="btn-action-lg btn-outline nav-item-desktop active" data-target="view-parcela">
+        <span>🧊</span> <span class="txt-nav-parcela">Mi Parcela 3D</span>
+      </button>
+      <button type="button" class="btn-action-lg btn-outline nav-item-desktop" data-target="view-ventas">
+        <span>📒</span> <span class="txt-nav-ventas">Ventas y Pedidos</span>
+      </button>
+      <button type="button" class="btn-action-lg btn-outline nav-item-desktop" data-target="view-chat">
+        <span>💬</span> <span class="txt-nav-chat">Chat con Proveedores</span>
+      </button>
+      <button type="button" class="btn-action-lg btn-outline nav-item-desktop" data-target="view-updates">
+        <span>🔄</span> <span class="txt-nav-updates">Actualizar App</span>
+      </button>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO -->
+    <main class="main-content">
+
+      <!-- MÓDULO 1: MI PARCELA 3D Y GESTIÓN DE PRODUCTOS -->
+      <section id="view-parcela" class="view-pane active">
+        <div class="card card-tech">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span>🧊</span> <span id="t-parcel-title">Mi Terreno 3D Interactivo</span>
+            </h2>
+            <span class="product-badge badge-neon">Interactivo</span>
+          </div>
+
+          <!-- VISOR 3D DE PARCELA (Canvas Interactivo) -->
+          <div class="parcel-container">
+            <canvas id="parcelCanvas"></canvas>
+
+            <!-- Leyenda 3D -->
+            <div class="parcel-legend">
+              <div class="legend-item">
+                <div class="legend-box" style="background:#00FF66"></div>
+                <span id="l-ready">Listo p/ Vender</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-box" style="background:#FFC24B"></div>
+                <span id="l-harvest">En Cosecha</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-box" style="background:#2E8B57"></div>
+                <span id="l-grow">Creciendo</span>
+              </div>
+            </div>
+
+            <!-- Controles Táctiles del 3D -->
+            <div class="parcel-controls">
+              <div class="control-cluster">
+                <button type="button" class="btn-ctrl" id="btnRotateLeft" title="Girar Izquierda">↺</button>
+                <button type="button" class="btn-ctrl" id="btnRotateRight" title="Girar Derecha">↻</button>
+              </div>
+              <div class="control-cluster">
+                <button type="button" class="btn-ctrl" id="btnZoomIn" title="Acercar">+</button>
+                <button type="button" class="btn-ctrl" id="btnZoomOut" title="Alejar">−</button>
+                <button type="button" class="btn-ctrl" id="btnResetView" title="Centrar">⊙</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <button type="button" class="btn-action-lg btn-neon" id="btnOpenAddProduct">
+              <span>➕</span> <span id="lblAddHarvest">Agregar Producto / Cosecha a mi Parcela</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- LISTA RÁPIDA DE MIS PRODUCTOS HOY -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>🌱</span> <span id="t-my-products">Mis Productos Activos Hoy</span>
+            </h3>
+            <span class="product-badge badge-neon" id="badgeTotalProducts">4 Lotes</span>
+          </div>
+          <div class="product-grid" id="productsListContainer">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 2: GESTIÓN DE VENTAS Y PEDIDOS -->
+      <section id="view-ventas" class="view-pane">
+        <!-- Pizarra de Precios del Día en Quillabamba -->
+        <div class="market-banner">
+          <div class="market-item">
+            <span class="market-crop">Café Pergamino Especial</span>
+            <span class="market-val">S/ 17.50 / kg</span>
+          </div>
+          <div class="market-item">
+            <span class="market-crop">Cacao Chuncho Fino</span>
+            <span class="market-val">S/ 24.00 / kg</span>
+          </div>
+          <div class="market-item">
+            <span class="market-crop">Plátano Seda / Isla</span>
+            <span class="market-val">S/ 28.00 / racimo</span>
+          </div>
+          <div class="market-item">
+            <span class="market-crop">Palta Hass Selecta</span>
+            <span class="market-val">S/ 7.50 / kg</span>
+          </div>
+        </div>
+
+        <!-- Resumen de Ganancias -->
+        <div class="sales-summary-grid">
+          <div class="summary-box">
+            <div class="summary-period" id="lblHoy">Hoy</div>
+            <div class="summary-amount" id="sumHoy">S/ 185.00</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-period" id="lblSemana">Esta Semana</div>
+            <div class="summary-amount" id="sumSemana">S/ 1,420.00</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-period" id="lblMes">Este Mes</div>
+            <div class="summary-amount" id="sumMes">S/ 5,890.00</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-action-lg btn-amber" id="btnOpenNewSale" style="margin-bottom: 16px;">
+          <span>➕</span> <span id="lblAddSale">Anotar Nueva Venta Realizada</span>
+        </button>
+
+        <!-- Bandeja de Pedidos y Reservas -->
+        <div class="card card-tech">
+          <div class="card-header">
+            <h3 class="card-title">
+              <span>📥</span> <span id="t-orders">Pedidos y Reservas de Compradores</span>
+            </h3>
+            <span class="product-badge badge-amber" id="badgePendingOrders">2 Pendientes</span>
+          </div>
+          <div id="ordersListContainer">
+            <!-- Pedidos cargados dinámicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 3: CHAT CON PROVEEDORES Y PRODUCTORES -->
+      <section id="view-chat" class="view-pane">
+        <!-- Pestañas de Categoría -->
+        <div class="chat-categories">
+          <div class="chat-cat-tab active" data-cat="proveedores">🚜 Proveedores</div>
+          <div class="chat-cat-tab" data-cat="transporte">🚚 Transporte</div>
+          <div class="chat-cat-tab" data-cat="compradores">🤝 Compradores</div>
+        </div>
+
+        <!-- Directorio de Contactos de Quillabamba -->
+        <div class="contacts-list" id="contactsContainer">
+          <!-- Cargado dinámicamente -->
+        </div>
+
+        <!-- Ventana de Chat Directo Interno -->
+        <div class="chat-box" id="activeChatBox">
+          <div class="chat-header">
+            <div class="contact-info">
+              <div class="contact-avatar">
+                <span id="chatActiveAvatar">🚜</span>
+                <span class="online-indicator"></span>
+              </div>
+              <div class="contact-text">
+                <h4 id="chatActiveName">AgroQuilla Insumos</h4>
+                <p id="chatActiveDesc">Pavayoc, Quillabamba · ★ 4.9</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn-chat-icon" id="btnChatCall" title="Llamar">📞</button>
+              <button type="button" class="btn-chat-icon" id="btnChatWp" title="WhatsApp">🟢</button>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chatMessagesList">
+            <div class="message-bubble theirs">
+              ¡Hola don Diego! Tenemos abono orgánico foliar y tijeras de podar de acero japonés recién llegadas a la tienda de Pavayoc.
+            </div>
+            <div class="message-bubble mine">
+              Buenas tardes, necesito 3 sacos de bioestimulante para mi parcela de café. ¿A cuánto me lo dejas?
+            </div>
+            <div class="message-bubble theirs">
+              A S/ 45 cada saco para agricultores de AgroConecta. Te lo llevamos hasta la salida a Santa Ana si deseas.
+            </div>
+          </div>
+
+          <div class="chat-input-bar">
+            <!-- Botón de Dictado por Voz -->
+            <button type="button" class="btn-chat-icon dictate" id="btnDictateChat" title="Dictar por voz">🎤</button>
+            <!-- Compartir Lote 3D -->
+            <button type="button" class="btn-chat-icon" id="btnShareParcelLot" title="Compartir Lote de Cosecha">📦</button>
+            <input type="text" class="chat-input-field" id="chatInputField" placeholder="Escribe o presiona el micrófono...">
+            <button type="button" class="btn-chat-icon" id="btnSendChatMsg" style="background:var(--neon);color:#000;">➤</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 4: AUTO-ACTUALIZADOR GITHUB SUPOECONOMY -->
+      <section id="view-updates" class="view-pane">
+        <div class="updater-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span>🔄</span> <span>Auto-Actualizador GitHub OTA</span>
+            </h2>
+            <span class="product-badge badge-neon" id="updateStatusBadge">Al Día</span>
+          </div>
+
+          <p style="font-size:13.5px;color:var(--muted);line-height:1.4;margin-bottom:14px;">
+            Este sistema conecta directamente con el repositorio oficial en la cuenta <strong>Supoeconomy</strong> en GitHub. Al actualizarse, se descargan las mejoras automáticamente a tu celular sin borrar tus productos, cosechas ni ventas guardadas.
+          </p>
+
+          <div style="background:var(--surface2);padding:14px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid var(--border-soft);">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+              <span>Repositorio Vinculado:</span>
+              <strong style="color:var(--neon);">Supoeconomy/agroconecta-agricultor</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+              <span>Versión Instalada:</span>
+              <strong id="curVerDisplay">v1.0.0 (Build 100)</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span>Última Comprobación:</span>
+              <span id="lastCheckDisplay">Hoy en vivo</span>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso de Actualización -->
+          <div class="progress-bar-container" id="updateProgressContainer">
+            <div class="progress-bar-fill" id="updateProgressBar"></div>
+          </div>
+          <div id="updateStatusText" style="font-size:12px;color:var(--neon);font-weight:700;display:none;margin-bottom:12px;">
+            Comprobando cambios en Supoeconomy/agroconecta-agricultor...
+          </div>
+
+          <button type="button" class="btn-action-lg btn-neon" id="btnTriggerUpdate">
+            <span>🔄</span> <span>Buscar y Descargar Última Actualización</span>
+          </button>
+
+          <div style="margin-top:12px;">
+            <button type="button" class="btn-action-lg btn-outline" id="btnInstallPwa">
+              <span>📲</span> <span>Instalar App en Celular (PWA / Pantalla de Inicio)</span>
+            </button>
+          </div>
+
+          <div class="changelog-box">
+            <strong style="color:var(--ink);">Historial de Mejoras (Supoeconomy):</strong><br>
+            • v1.0.0: Lanzamiento oficial exclusivo para agricultores de Quillabamba y La Convención.<br>
+            • Visor 3D isométrico fluido con sectores interactivos de terreno.<br>
+            • Registro ágil de ventas en Soles (Efectivo, Yape, Plin).<br>
+            • Directorio y chat directo con proveedores y compradores locales.<br>
+            • Motor OTA vinculado a GitHub Supoeconomy con respaldo offline-first.
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- NAVEGACIÓN INFERIOR (MÓVIL) -->
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn active" data-target="view-parcela">
+      <span class="nav-icon">🧊</span>
+      <span class="txt-nav-parcela">Parcela 3D</span>
+    </button>
+    <button type="button" class="nav-btn" data-target="view-ventas">
+      <span class="nav-icon">📒</span>
+      <span class="txt-nav-ventas">Ventas</span>
+    </button>
+    <button type="button" class="nav-btn" data-target="view-chat">
+      <span class="nav-icon">💬</span>
+      <span class="txt-nav-chat">Chat</span>
+    </button>
+    <button type="button" class="nav-btn" data-target="view-updates">
+      <span class="nav-icon">🔄</span>
+      <span class="txt-nav-updates">Actualizar</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: AGREGAR / EDITAR PRODUCTO EN PARCELA -->
+  <div class="modal-overlay" id="modalProduct">
+    <div class="modal-card">
+      <div class="modal-title-row">
+        <h3 style="font-family:var(--font-display);font-size:18px;">🌱 Cosecha en Parcela</h3>
+        <button type="button" class="btn-close-modal" onclick="closeModal('modalProduct')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sector del Terreno</label>
+        <select class="form-select" id="pSector">
+          <option value="1">Sector 1: Ladera Alta (Café)</option>
+          <option value="2">Sector 2: Quebrada Fresca (Cacao)</option>
+          <option value="3">Sector 3: Terraza Media (Frutales)</option>
+          <option value="4">Sector 4: Valle Bajo (Palta / Tubérculos)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cultivo / Producto</label>
+        <select class="form-select" id="pCrop">
+          <option value="Café">Café en Grano</option>
+          <option value="Cacao">Cacao Chuncho</option>
+          <option value="Plátano">Plátano (Seda / Isla / Bellaco)</option>
+          <option value="Cítricos">Cítricos (Naranja / Mandarina)</option>
+          <option value="Palta">Palta Hass / Fuerte</option>
+          <option value="Yuca">Yuca y Tubérculos</option>
+          <option value="Kión">Kión / Cúrcuma Orgánica</option>
+          <option value="Miel">Miel de Abeja Silvestre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Variedad / Proceso</label>
+        <input type="text" class="form-input" id="pVariety" placeholder="Ej: Geisha Lavado, Chuncho Seco en Grano">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cantidad Disponible</label>
+        <div class="stepper-row">
+          <button type="button" class="btn-step" onclick="adjustQty(-5)">−</button>
+          <input type="number" class="form-input" id="pQty" value="50" style="text-align:center;font-weight:800;font-size:20px;">
+          <button type="button" class="btn-step" onclick="adjustQty(5)">+</button>
+          <select class="form-select" id="pUnit" style="width:110px;">
+            <option value="kg">Kilos</option>
+            <option value="sacos">Sacos</option>
+            <option value="quintales">Quintales</option>
+            <option value="cientos">Cientos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Precio de Venta (Soles S/)</label>
+        <input type="number" step="0.50" class="form-input" id="pPrice" placeholder="Ej: 18.00" value="18.00">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estado de Cosecha</label>
+        <select class="form-select" id="pStatus">
+          <option value="ready">📦 Listo para vender</option>
+          <option value="harvest">🍒 En cosecha actual</option>
+          <option value="growing">🌱 En crecimiento</option>
+        </select>
+      </div>
+
+      <div class="switch-row" onclick="toggleVisibilitySwitch()">
+        <div>
+          <strong style="font-size:14px;color:var(--ink);">Visible para Compradores</strong>
+          <p style="font-size:11.5px;color:var(--muted);" id="visSwitchText">🟢 Visible para reservas en línea</p>
+        </div>
+        <input type="checkbox" id="pVisible" checked style="width:20px;height:20px;accent-color:var(--neon);">
+      </div>
+
+      <button type="button" class="btn-action-lg btn-neon" id="btnSaveProduct" style="margin-top:6px;">
+        <span>💾</span> <span>Guardar en mi Parcela</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR NUEVA VENTA RÁPIDA -->
+  <div class="modal-overlay" id="modalSale">
+    <div class="modal-card">
+      <div class="modal-title-row">
+        <h3 style="font-family:var(--font-display);font-size:18px;">💵 Anotar Nueva Venta</h3>
+        <button type="button" class="btn-close-modal" onclick="closeModal('modalSale')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Producto Vendido</label>
+        <select class="form-select" id="sProduct">
+          <!-- Opciones cargadas de los productos del agricultor -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cantidad Vendida</label>
+        <input type="text" class="form-input" id="sQty" placeholder="Ej: 10 kg o 2 sacos" value="10 kg">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Monto Total Cobrado (S/)</label>
+        <input type="number" step="1.00" class="form-input" id="sAmount" placeholder="Ej: 175.00" value="175.00" style="font-size:22px;font-weight:800;color:var(--neon);">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Medio de Cobro</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <button type="button" class="btn-prod-sm active-pay" data-pay="Efectivo" style="background:rgba(0,255,102,0.15);border-color:var(--neon);color:var(--neon);">💵 Efectivo</button>
+          <button type="button" class="btn-prod-sm" data-pay="Yape">🟣 Yape</button>
+          <button type="button" class="btn-prod-sm" data-pay="Plin">🔵 Plin</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn-action-lg btn-amber" id="btnConfirmSale" style="margin-top:6px;">
+        <span>✓</span> <span>Registrar Venta en Mis Cuentas</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+  /* ==========================================================
+     LÓGICA OPERATIVA COMPLETA · AGROCONECTA AGRICULTOR
+     ========================================================== */
+
+  // 1. ESTADO PERSISTENTE EN LOCALSTORAGE
+  const DEFAULT_PRODUCTS = [
+    { id: 'p1', sector: 1, crop: 'Café en Grano', variety: 'Geisha y Típica Lavado', qty: 120, unit: 'kg', price: 18.50, status: 'ready', visible: true },
+    { id: 'p2', sector: 2, crop: 'Cacao Chuncho', variety: 'Nativo Fino de Aroma (Seco)', qty: 85, unit: 'kg', price: 24.00, status: 'ready', visible: true },
+    { id: 'p3', sector: 3, crop: 'Plátano Seda', variety: 'Racimos seleccionados', qty: 30, unit: 'sacos', price: 28.00, status: 'harvest', visible: true },
+    { id: 'p4', sector: 4, crop: 'Palta Hass', variety: 'Selecta de Exportación', qty: 250, unit: 'kg', price: 7.50, status: 'growing', visible: false }
+  ];
+
+  const DEFAULT_ORDERS = [
+    { id: 'ord-101', buyer: 'Asociación de Baristas Cusco', crop: 'Café en Grano (Geisha)', qty: '40 kg', total: 'S/ 740.00', status: 'pending' },
+    { id: 'ord-102', buyer: 'Chocolatería Artesanal Valle', crop: 'Cacao Chuncho Nativo', qty: '30 kg', total: 'S/ 720.00', status: 'pending' }
+  ];
+
+  const CONTACTS = [
+    { id: 'c1', name: 'AgroQuilla Insumos', cat: 'proveedores', avatar: '🚜', desc: 'Pavayoc · Bioabonos y Herramientas', rating: '★ 4.9', online: true },
+    { id: 'c2', name: 'Semillas & Viveros Urusayhua', cat: 'proveedores', avatar: '🌱', desc: 'Santa Ana · Plantones Certificados', rating: '★ 4.8', online: false },
+    { id: 'c3', name: 'Transportes Vilcabamba', cat: 'transporte', avatar: '🚚', desc: 'Fletes Quillabamba - Cusco', rating: '★ 4.9', online: true },
+    { id: 'c4', name: 'Acopio Central Convención', cat: 'transporte', avatar: '📦', desc: 'Ruta Valle Echarati', rating: '★ 4.7', online: true },
+    { id: 'c5', name: 'Cooperativa Agraria Cafetalera', cat: 'compradores', avatar: '🤝', desc: 'Quillabamba · Compra directa', rating: '★ 5.0', online: true },
+    { id: 'c6', name: 'Comprador Mayorista Lima', cat: 'compradores', avatar: '🏪', desc: 'Frutas y Cacao Especial', rating: '★ 4.8', online: false }
+  ];
+
+  let products = JSON.parse(localStorage.getItem('agro_products')) || DEFAULT_PRODUCTS;
+  let orders = JSON.parse(localStorage.getItem('agro_orders')) || DEFAULT_ORDERS;
+  let salesToday = parseFloat(localStorage.getItem('agro_sales_today') || '185.00');
+  let selectedPayMethod = 'Efectivo';
+  let activeContact = CONTACTS[0];
+
+  function saveProducts() {
+    localStorage.setItem('agro_products', JSON.stringify(products));
+    renderProducts();
+    updateSaleDropdown();
+    drawParcel3D();
+  }
+
+  function saveOrders() {
+    localStorage.setItem('agro_orders', JSON.stringify(orders));
+    renderOrders();
+  }
+
+  // 2. DICCIONARIO INTERCULTURAL
+  const I18N = {
+    es: {
+      parcelTitle: "Mi Terreno 3D Interactivo",
+      myProducts: "Mis Productos Activos Hoy",
+      addHarvest: "Agregar Producto / Cosecha a mi Parcela",
+      ordersTitle: "Pedidos y Reservas de Compradores",
+      addSale: "Anotar Nueva Venta Realizada",
+      voiceBtn: "Escuchar Pantalla"
+    },
+    qu: {
+      parcelTitle: "Kawsay Allpay 3D (Allpa Chay)",
+      myProducts: "Kunan Poqoykunay (Llaqtanchis)",
+      addHarvest: "Mosoq Poqoyta Yapay Allpayman",
+      ordersTitle: "Rantikuqkuna Mañakusqanku",
+      addSale: "Rantisqayta Qelqay (Qolqe)",
+      voiceBtn: "Uyarikuy Rimayta"
+    },
+    ash: {
+      parcelTitle: "Nomatsata 3D (Nipankite)",
+      myProducts: "Nopankite Mapicha Kityoncari",
+      addHarvest: "Pimpasantye Iñaani Nomatsataki",
+      ordersTitle: "Aipatsite Iñaani Yamanani",
+      addSale: "Kosanto Kirika (Kireki)",
+      voiceBtn: "Kemeero Oñaani"
+    }
+  };
+
+  document.getElementById('appLang').addEventListener('change', (e) => {
+    const lang = I18N[e.target.value] || I18N.es;
+    document.getElementById('t-parcel-title').textContent = lang.parcelTitle;
+    document.getElementById('t-my-products').textContent = lang.myProducts;
+    document.getElementById('lblAddHarvest').textContent = lang.addHarvest;
+    document.getElementById('t-orders').textContent = lang.ordersTitle;
+    document.getElementById('lblAddSale').textContent = lang.addSale;
+    document.getElementById('lblVoiceBtn').textContent = lang.voiceBtn;
+  });
+
+  // 3. NAVEGACIÓN ENTRE MÓDULOS
+  function setupNavigation() {
+    const navButtons = document.querySelectorAll('.nav-btn, .nav-item-desktop');
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        document.querySelectorAll('.nav-btn, .nav-item-desktop').forEach(b => {
+          b.classList.toggle('active', b.dataset.target === target);
+        });
+        document.querySelectorAll('.view-pane').forEach(p => {
+          p.classList.toggle('active', p.id === target);
+        });
+        if (target === 'view-parcela') {
+          setTimeout(drawParcel3D, 50);
+        }
+      });
+    });
+  }
+
+  // 4. VISOR DE PARCELA 3D ISOMÉTRICO EN CANVAS (100% FLUIDO Y SIN DEPENDENCIAS)
+  const canvas = document.getElementById('parcelCanvas');
+  const ctx = canvas.getContext('2d');
+  let angle = 0.55;
+  let zoom = 1.0;
+  let selectedSector = null;
+
+  function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * (window.devicePixelRatio || 1);
+    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    drawParcel3D();
+  }
+
+  function drawParcel3D() {
+    const w = canvas.parentElement.clientWidth;
+    const h = canvas.parentElement.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2 - 10;
+    const size = 110 * zoom;
+
+    // Proyección isométrica
+    function iso(x, y, z) {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const rx = x * cos - y * sin;
+      const ry = x * sin + y * cos;
+      return {
+        x: cx + (rx - ry) * (size * 0.7),
+        y: cy + (rx + ry) * (size * 0.35) - z * (size * 0.45)
+      };
+    }
+
+    // Dibujar los 4 sectores del terreno
+    const sectors = [
+      { id: 1, name: 'Ladera Alta (Café)', x: -1, y: -1, color: '#00FF66', icon: '☕' },
+      { id: 2, name: 'Quebrada (Cacao)', x: 1, y: -1, color: '#FFC24B', icon: '🍫' },
+      { id: 3, name: 'Terraza (Frutales)', x: -1, y: 1, color: '#2E8B57', icon: '🍌' },
+      { id: 4, name: 'Valle (Palta)', x: 1, y: 1, color: '#00E5FF', icon: '🥑' }
+    ];
+
+    // Base de tierra 3D
+    ctx.beginPath();
+    const p1 = iso(-2, -2, 0);
+    const p2 = iso(2, -2, 0);
+    const p3 = iso(2, 2, 0);
+    const p4 = iso(-2, 2, 0);
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.closePath();
+    ctx.fillStyle = '#0a141f';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 255, 102, 0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Espesor de tierra
+    ctx.beginPath();
+    const b2 = iso(2, -2, -0.4);
+    const b3 = iso(2, 2, -0.4);
+    const b4 = iso(-2, 2, -0.4);
+    ctx.moveTo(p2.x, p2.y);
+    ctx.lineTo(b2.x, b2.y);
+    ctx.lineTo(b3.x, b3.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.fillStyle = '#060a0f';
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(p3.x, p3.y);
+    ctx.lineTo(b3.x, b3.y);
+    ctx.lineTo(b4.x, b4.y);
+    ctx.lineTo(p4.x, p4.y);
+    ctx.fillStyle = '#04070a';
+    ctx.fill();
+    ctx.stroke();
+
+    // Cada sector
+    sectors.forEach(s => {
+      const q1 = iso(s.x - 0.85, s.y - 0.85, 0.1);
+      const q2 = iso(s.x + 0.85, s.y - 0.85, 0.1);
+      const q3 = iso(s.x + 0.85, s.y + 0.85, 0.1);
+      const q4 = iso(s.x - 0.85, s.y + 0.85, 0.1);
+
+      ctx.beginPath();
+      ctx.moveTo(q1.x, q1.y);
+      ctx.lineTo(q2.x, q2.y);
+      ctx.lineTo(q3.x, q3.y);
+      ctx.lineTo(q4.x, q4.y);
+      ctx.closePath();
+
+      const isSel = selectedSector === s.id;
+      ctx.fillStyle = isSel ? 'rgba(0, 255, 102, 0.35)' : 'rgba(17, 30, 46, 0.85)';
+      ctx.fill();
+      ctx.strokeStyle = isSel ? '#00FF66' : 'rgba(0, 255, 102, 0.3)';
+      ctx.lineWidth = isSel ? 2.5 : 1;
+      ctx.stroke();
+
+      // Icono y etiqueta del cultivo en el centro del sector
+      const center = iso(s.x, s.y, 0.35);
+      ctx.font = `${24 * zoom}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(s.icon, center.x, center.y);
+
+      // Estado
+      const prod = products.find(p => p.sector === s.id);
+      const color = prod?.status === 'ready' ? '#00FF66' : (prod?.status === 'harvest' ? '#FFC24B' : '#2E8B57');
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y + 18 * zoom, 5 * zoom, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  // Controles del visor 3D
+  document.getElementById('btnRotateLeft').onclick = () => { angle += 0.25; drawParcel3D(); };
+  document.getElementById('btnRotateRight').onclick = () => { angle -= 0.25; drawParcel3D(); };
+  document.getElementById('btnZoomIn').onclick = () => { zoom = Math.min(zoom + 0.15, 1.8); drawParcel3D(); };
+  document.getElementById('btnZoomOut').onclick = () => { zoom = Math.max(zoom - 0.15, 0.6); drawParcel3D(); };
+  document.getElementById('btnResetView').onclick = () => { angle = 0.55; zoom = 1.0; selectedSector = null; drawParcel3D(); };
+
+  // Interacción táctil en el 3D
+  let isDragging = false;
+  let startX = 0;
+  canvas.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    angle -= dx * 0.008;
+    startX = e.clientX;
+    drawParcel3D();
+  });
+  window.addEventListener('pointerup', () => isDragging = false);
+
+  canvas.addEventListener('click', (e) => {
+    // Al tocar el canvas, alternar sector y abrir tarjeta
+    selectedSector = (selectedSector % 4) + 1;
+    drawParcel3D();
+    openProductModalForSector(selectedSector);
+  });
+
+  // 5. RENDERIZAR LISTA DE PRODUCTOS ACTIVOS
+  function renderProducts() {
+    const container = document.getElementById('productsListContainer');
+    container.innerHTML = '';
+    products.forEach((p, idx) => {
+      const card = document.createElement('div');
+      card.className = `product-card ${p.visible ? 'public' : 'private'}`;
+      card.innerHTML = `
+        <div class="product-head">
+          <div class="product-name">${p.crop}</div>
+          <span class="product-badge ${p.status === 'ready' ? 'badge-neon' : 'badge-amber'}">
+            ${p.status === 'ready' ? '📦 Listo para Vender' : (p.status === 'harvest' ? '🍒 En Cosecha' : '🌱 Creciendo')}
+          </span>
+        </div>
+        <div class="product-detail">
+          <span>${p.variety || 'Variedad estándar'} · Sector ${p.sector}</span>
+          <strong style="color:var(--ink);">${p.qty} ${p.unit}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+          <div class="product-price-tag">S/ ${parseFloat(p.price).toFixed(2)} <span style="font-size:12px;color:var(--muted)">/ ${p.unit}</span></div>
+          <span style="font-size:11px;font-weight:700;color:${p.visible ? 'var(--neon)' : 'var(--muted)'};">
+            ${p.visible ? '🟢 Visible Compradores' : '⚪ Solo mi Control'}
+          </span>
+        </div>
+        <div class="product-actions-row">
+          <button type="button" class="btn-prod-sm" onclick="editProduct(${idx})">✏️ Modificar</button>
+          <button type="button" class="btn-prod-sm" onclick="markSold(${idx})">✓ Marcar Vendido</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+    document.getElementById('badgeTotalProducts').textContent = `${products.length} Lotes`;
+  }
+
+  window.markSold = function(idx) {
+    const p = products[idx];
+    const monto = p.qty * p.price;
+    salesToday += monto;
+    localStorage.setItem('agro_sales_today', salesToday.toFixed(2));
+    updateSalesDisplay();
+    products.splice(idx, 1);
+    saveProducts();
+    alert(`¡Venta anotada! Lote de ${p.crop} registrado como vendido por S/ ${monto.toFixed(2)}.`);
+  };
+
+  // 6. VENTAS Y PEDIDOS
+  function renderOrders() {
+    const container = document.getElementById('ordersListContainer');
+    container.innerHTML = '';
+    orders.forEach((o, idx) => {
+      const div = document.createElement('div');
+      div.className = `order-item ${o.status === 'confirmed' ? 'confirmed' : ''}`;
+      div.innerHTML = `
+        <div class="order-head">
+          <span class="order-buyer">👤 ${o.buyer}</span>
+          <strong style="color:var(--neon);font-size:16px;">${o.total}</strong>
+        </div>
+        <div class="order-detail">${o.crop} · Cantidad: ${o.qty}</div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          ${o.status === 'confirmed' 
+            ? `<span style="color:var(--neon);font-weight:700;font-size:13px;">✓ Pedido Confirmado</span>`
+            : `<button type="button" class="btn-prod-sm" style="background:var(--neon);color:#000;" onclick="confirmOrder(${idx})">✓ Confirmar Pedido</button>`
+          }
+          <button type="button" class="btn-prod-sm" onclick="chatWithBuyer('${o.buyer}')">💬 Hablar con Comprador</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+    const pending = orders.filter(o => o.status === 'pending').length;
+    document.getElementById('badgePendingOrders').textContent = `${pending} Pendientes`;
+  }
+
+  window.confirmOrder = function(idx) {
+    orders[idx].status = 'confirmed';
+    saveOrders();
+  };
+
+  window.chatWithBuyer = function(buyerName) {
+    document.querySelectorAll('.nav-btn, .nav-item-desktop').forEach(b => {
+      b.classList.toggle('active', b.dataset.target === 'view-chat');
+    });
+    document.querySelectorAll('.view-pane').forEach(p => {
+      p.classList.toggle('active', p.id === 'view-chat');
+    });
+    document.getElementById('chatActiveName').textContent = buyerName;
+    document.getElementById('chatActiveDesc').textContent = 'Comprador en línea · ★ 5.0';
+    document.getElementById('chatActiveAvatar').textContent = '🤝';
+  };
+
+  function updateSalesDisplay() {
+    document.getElementById('sumHoy').textContent = `S/ ${salesToday.toFixed(2)}`;
+    document.getElementById('sumSemana').textContent = `S/ ${(salesToday + 1235).toFixed(2)}`;
+    document.getElementById('sumMes').textContent = `S/ ${(salesToday + 5705).toFixed(2)}`;
+  }
+
+  // 7. CHAT CON PROVEEDORES
+  function renderContacts(category = 'proveedores') {
+    const container = document.getElementById('contactsContainer');
+    container.innerHTML = '';
+    const filtered = CONTACTS.filter(c => c.cat === category);
+    filtered.forEach(c => {
+      const card = document.createElement('div');
+      card.className = `contact-card ${activeContact.id === c.id ? 'active' : ''}`;
+      card.innerHTML = `
+        <div class="contact-info">
+          <div class="contact-avatar">
+            <span>${c.avatar}</span>
+            <span class="online-indicator ${c.online ? '' : 'offline'}"></span>
+          </div>
+          <div class="contact-text">
+            <h4>${c.name}</h4>
+            <p>${c.desc} · ${c.rating}</p>
+          </div>
+        </div>
+        <span style="font-size:18px;color:var(--neon)">›</span>
+      `;
+      card.onclick = () => {
+        activeContact = c;
+        document.getElementById('chatActiveName').textContent = c.name;
+        document.getElementById('chatActiveDesc').textContent = `${c.desc} · ${c.rating}`;
+        document.getElementById('chatActiveAvatar').textContent = c.avatar;
+        renderContacts(category);
+      };
+      container.appendChild(card);
+    });
+  }
+
+  document.querySelectorAll('.chat-cat-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.chat-cat-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderContacts(tab.dataset.cat);
+    };
+  });
+
+  // Enviar mensaje de chat con respuesta inteligente
+  document.getElementById('btnSendChatMsg').onclick = sendMessage;
+  document.getElementById('chatInputField').onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+  function sendMessage() {
+    const input = document.getElementById('chatInputField');
+    const txt = input.value.trim();
+    if (!txt) return;
+
+    const list = document.getElementById('chatMessagesList');
+    const myBubble = document.createElement('div');
+    myBubble.className = 'message-bubble mine';
+    myBubble.textContent = txt;
+    list.appendChild(myBubble);
+    input.value = '';
+    list.scrollTop = list.scrollHeight;
+
+    // Respuesta simulada de Quillabamba tras 1.2 segundos
+    setTimeout(() => {
+      const resp = document.createElement('div');
+      resp.className = 'message-bubble theirs';
+      resp.textContent = `¡Recibido don Diego! Confirmado de parte de ${activeContact.name}. Quedamos en contacto directo para coordinar entrega.`;
+      list.appendChild(resp);
+      list.scrollTop = list.scrollHeight;
+    }, 1200);
+  }
+
+  // Compartir lote en chat
+  document.getElementById('btnShareParcelLot').onclick = () => {
+    if (products.length === 0) return alert('No tienes productos activos en tu Parcela.');
+    const p = products[0];
+    const msg = `📦 [LOTE DISPONIBLE]: ${p.crop} (${p.variety}) - ${p.qty} ${p.unit} a S/ ${p.price}/${p.unit} listo en mi chacra de Quillabamba.`;
+    document.getElementById('chatInputField').value = msg;
+  };
+
+  // Dictado por voz (SpeechRecognition)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    const recog = new SpeechRecognition();
+    recog.lang = 'es-PE';
+    recog.continuous = false;
+    const btn = document.getElementById('btnDictateChat');
+    btn.onclick = () => {
+      if (btn.classList.contains('listening')) {
+        recog.stop();
+        btn.classList.remove('listening');
+      } else {
+        recog.start();
+        btn.classList.add('listening');
+      }
+    };
+    recog.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      document.getElementById('chatInputField').value += transcript;
+      btn.classList.remove('listening');
+    };
+    recog.onerror = () => btn.classList.remove('listening');
+    recog.onend = () => btn.classList.remove('listening');
+  }
+
+  // Lectura en voz alta (speechSynthesis)
+  document.getElementById('btnGlobalVoice').onclick = () => {
+    if (!('speechSynthesis' in window)) return alert('Tu celular no tiene sintetizador de voz activado.');
+    window.speechSynthesis.cancel();
+    const activeView = document.querySelector('.view-pane.active');
+    const text = (activeView.innerText || '').replace(/\s+/g, ' ');
+
+    const utter = new SpeechSynthesisUtterance(text.substring(0, 400));
+    utter.lang = 'es-PE';
+    utter.rate = 0.95;
+    window.speechSynthesis.speak(utter);
+  };
+
+  // 8. AUTO-UPDATER CON GITHUB SUPOECONOMY
+  const GITHUB_REPO = 'Supoeconomy/agroconecta-agricultor';
+  const CURRENT_VERSION = 'v1.0.0';
+
+  async function checkGithubUpdates() {
+    const statusLabel = document.getElementById('githubUpdateLabel');
+    const statusText = document.getElementById('updateStatusText');
+    const pBar = document.getElementById('updateProgressBar');
+    const pCont = document.getElementById('updateProgressContainer');
+
+    pCont.style.display = 'block';
+    statusText.style.display = 'block';
+    statusText.textContent = `Conectando con api.github.com/repos/${GITHUB_REPO}...`;
+    pBar.style.width = '30%';
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/main`, { cache: 'no-store' });
+      pBar.style.width = '70%';
+
+      if (res.ok) {
+        const data = await res.json();
+        const latestSha = data.sha.substring(0, 7);
+        statusText.textContent = `Último commit en Supoeconomy: ${latestSha} (${new Date(data.commit.author.date).toLocaleDateString()})`;
+        pBar.style.width = '100%';
+
+        // Limpiar Service Worker caches e invalidar versión
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+
+        setTimeout(() => {
+          alert('¡App al día con el repositorio Supoeconomy! Caché renovado con éxito.');
+          pCont.style.display = 'none';
+          statusText.style.display = 'none';
+        }, 800);
+      } else {
+        throw new Error('Repositorio aún creándose o límite de API alcanzado');
+      }
+    } catch (err) {
+      pBar.style.width = '100%';
+      statusText.textContent = `Versión instalada ${CURRENT_VERSION} operando en modo local seguro.`;
+      setTimeout(() => {
+        pCont.style.display = 'none';
+        statusText.style.display = 'none';
+      }, 1500);
+    }
+  }
+
+  document.getElementById('btnGithubUpdate').onclick = checkGithubUpdates;
+  document.getElementById('btnTriggerUpdate').onclick = checkGithubUpdates;
+
+  // 9. MODALES Y REGISTROS
+  window.openModal = function(id) { document.getElementById(id).classList.add('active'); };
+  window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); };
+
+  document.getElementById('btnOpenAddProduct').onclick = () => openModal('modalProduct');
+  document.getElementById('btnOpenNewSale').onclick = () => openModal('modalSale');
+
+  window.adjustQty = function(delta) {
+    const input = document.getElementById('pQty');
+    let val = parseInt(input.value) || 0;
+    input.value = Math.max(1, val + delta);
+  };
+
+  window.toggleVisibilitySwitch = function() {
+    const chk = document.getElementById('pVisible');
+    chk.checked = !chk.checked;
+    document.getElementById('visSwitchText').textContent = chk.checked ? '🟢 Visible para reservas en línea' : '⚪ Solo para mi control';
+  };
+
+  document.getElementById('btnSaveProduct').onclick = () => {
+    const crop = document.getElementById('pCrop').value;
+    const variety = document.getElementById('pVariety').value || 'Seleccionado';
+    const sector = parseInt(document.getElementById('pSector').value);
+    const qty = parseInt(document.getElementById('pQty').value) || 10;
+    const unit = document.getElementById('pUnit').value;
+    const price = parseFloat(document.getElementById('pPrice').value) || 10.0;
+    const status = document.getElementById('pStatus').value;
+    const visible = document.getElementById('pVisible').checked;
+
+    products.unshift({ id: 'p_' + Date.now(), sector, crop, variety, qty, unit, price, status, visible });
+    saveProducts();
+    closeModal('modalProduct');
+    alert('¡Producto guardado exitosamente en tu Parcela 3D!');
+  };
+
+  function updateSaleDropdown() {
+    const sel = document.getElementById('sProduct');
+    sel.innerHTML = '';
+    products.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.crop;
+      opt.textContent = `${p.crop} (${p.variety}) - S/ ${p.price}/${p.unit}`;
+      sel.appendChild(opt);
+    });
+  }
+
+  document.querySelectorAll('[data-pay]').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('[data-pay]').forEach(b => {
+        b.style.background = 'var(--surface)';
+        b.style.borderColor = 'var(--border-soft)';
+        b.style.color = 'var(--ink)';
+      });
+      btn.style.background = 'rgba(0,255,102,0.15)';
+      btn.style.borderColor = 'var(--neon)';
+      btn.style.color = 'var(--neon)';
+      selectedPayMethod = btn.dataset.pay;
+    };
+  });
+
+  document.getElementById('btnConfirmSale').onclick = () => {
+    const prod = document.getElementById('sProduct').value;
+    const qty = document.getElementById('sQty').value;
+    const amount = parseFloat(document.getElementById('sAmount').value) || 0;
+
+    salesToday += amount;
+    localStorage.setItem('agro_sales_today', salesToday.toFixed(2));
+    updateSalesDisplay();
+    closeModal('modalSale');
+    alert(`¡Venta de ${prod} registrada con éxito (${selectedPayMethod} - S/ ${amount.toFixed(2)})!`);
+  };
+
+  function openProductModalForSector(secId) {
+    document.getElementById('pSector').value = secId;
+    openModal('modalProduct');
+  }
+
+  // 10. SEMÁFORO DE SEÑAL ONLINE / OFFLINE
+  function updateNetworkStatus() {
+    const dot = document.getElementById('signalDot');
+    const text = document.getElementById('signalText');
+    if (navigator.onLine) {
+      dot.className = 'signal-dot';
+      text.textContent = 'Conectado';
+    } else {
+      dot.className = 'signal-dot offline';
+      text.textContent = 'Sin Señal · Guardado';
+    }
+  }
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+
+  // INICIALIZACIÓN
+  window.addEventListener('resize', resizeCanvas);
+  document.addEventListener('DOMContentLoaded', () => {
+    setupNavigation();
+    renderProducts();
+    renderOrders();
+    renderContacts('proveedores');
+    updateSalesDisplay();
+    updateSaleDropdown();
+    updateNetworkStatus();
+    setTimeout(resizeCanvas, 60);
+
+    // Registro de Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  });
+  </script>
+</body>
+</html>

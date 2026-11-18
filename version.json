@@ -1,0 +1,8 @@
+{
+  "name": "AgroConecta Agricultor",
+  "version": "1.0.0",
+  "build": 100,
+  "commitDate": "2026-11-18",
+  "repository": "https://github.com/Supoeconomy/agroconecta-agricultor",
+  "releaseNotes": "Versión 1.0.0: Lanzamiento oficial para el Agricultor de Quillabamba. Parcela 3D, Registro de Ventas, Chat con Proveedores y Auto-Updater vinculado a GitHub Supoeconomy."
+}

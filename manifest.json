@@ -1,0 +1,24 @@
+{
+  "name": "AgroConecta Agricultor",
+  "short_name": "AgroConecta",
+  "description": "App de facilitación diaria para el agricultor tradicional de Quillabamba y La Convención",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070A0F",
+  "theme_color": "#070A0F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
