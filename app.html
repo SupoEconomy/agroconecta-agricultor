@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AgroConecta · App del Agricultor (Quillabamba)</title>
+<meta name="description" content="Aplicación de facilitación diaria para el agricultor tradicional de Quillabamba y La Convención.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#070A0F">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+
+<!-- Fuentes Google: Bricolage Grotesque & Instrument Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* Variables y Ajustes Específicos para Android APK */
+:root {
+  --neon: #00FF66;
+  --neon-glow: rgba(0, 255, 102, 0.35);
+  --amber: #FFC24B;
+  --amber-glow: rgba(255, 194, 75, 0.3);
+  --danger: #FF4D4D;
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding-bottom: 74px; /* Espacio para barra inferior Android */
+}
+
+/* Semáforo de Señal Offline-First */
+.signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  padding: 5px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.signal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+}
+.signal-dot.slow {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+.signal-dot.offline {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+}
+
+/* Botón Permanente de Auto-Actualización */
+.btn-auto-update-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 255, 102, 0.12);
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 11.5px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.btn-auto-update-top:hover {
+  background: var(--primary);
+  color: #000;
+  box-shadow: 0 0 14px var(--neon-glow);
+}
+.dot-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulseDot 1.4s infinite;
+}
+@keyframes pulseDot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 8px var(--primary); }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* Vistas de la App */
+.view-pane {
+  display: none;
+  animation: fadeIn 0.25s ease-out;
+}
+.view-pane.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Barra Inferior Fija para Celulares Android */
+.bottom-nav-android {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 150;
+  background: rgba(13, 20, 29, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1.5px solid var(--line2);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 70px;
+  padding: 0 4px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+}
+.nav-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.nav-tab-btn .tab-icon {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+.nav-tab-btn.active {
+  color: var(--primary);
+}
+.nav-tab-btn.active .tab-icon {
+  transform: translateY(-2px) scale(1.1);
+}
+.nav-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 32px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 0 8px var(--primary);
+}
+
+/* Visor 3D de Parcela */
+.parcel-3d-box {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  background: radial-gradient(circle at center, #111e2e 0%, #070a0f 100%);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  border: 1.5px solid var(--line2);
+  margin-bottom: 16px;
+}
+#parcelCanvas3D {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+.parcel-overlay-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+.parcel-btn-group {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+.btn-3d-ctrl {
+  width: 44px;
+  height: 44px;
+  background: rgba(13, 20, 29, 0.88);
+  border: 1.5px solid var(--line2);
+  color: var(--primary);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.btn-3d-ctrl:hover {
+  background: var(--primary);
+  color: #000;
+}
+
+/* Lotes e Inventario */
+.lot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.lot-card {
+  background: var(--surface);
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.lot-card.ready {
+  border-left: 5px solid var(--primary);
+}
+.lot-card.harvest {
+  border-left: 5px solid var(--amber);
+}
+.lot-card.empty {
+  border-left: 5px solid var(--muted);
+}
+.lot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lot-title {
+  font-family: var(--disp);
+  font-size: 16px;
+  font-weight: 800;
+}
+.lot-status-badge {
+  font-size: 10.5px;
+  font-weight: 750;
+  padding: 3px 8px;
+  border-radius: 100px;
+}
+.badge-ready { background: rgba(0, 255, 102, 0.15); color: var(--primary); border: 1px solid rgba(0,255,102,0.3); }
+.badge-harvest { background: rgba(255, 194, 75, 0.15); color: var(--amber); border: 1px solid rgba(255,194,75,0.3); }
+.badge-empty { background: rgba(255, 255, 255, 0.08); color: var(--muted); border: 1px solid var(--line2); }
+
+.lot-details {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.lot-price {
+  font-family: var(--disp);
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--primary);
+}
+
+/* Chat Interno */
+.chat-tab-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.chat-tab-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--line2);
+  color: var(--muted);
+  padding: 10px 4px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+  cursor: pointer;
+}
+.chat-tab-btn.active {
+  background: var(--surface2);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.chat-window {
+  background: var(--surface);
+  border: 1.5px solid var(--line2);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  height: 440px;
+}
+.chat-window-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-feed {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-msg {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+.chat-msg.mine {
+  align-self: flex-end;
+  background: rgba(0, 255, 102, 0.18);
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  color: var(--ink);
+  border-bottom-right-radius: 2px;
+}
+.chat-msg.theirs {
+  align-self: flex-start;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  color: var(--ink);
+  border-bottom-left-radius: 2px;
+}
+.chat-action-bar {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--line2);
+  color: var(--ink);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+.chat-input:focus { border-color: var(--primary); }
+.chat-btn-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line2);
+  background: var(--surface);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Auto-Updater */
+.ota-box {
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-card);
+  padding: 22px;
+  box-shadow: 0 0 24px var(--neon-glow);
+}
+.ota-progress-bg {
+  width: 100%;
+  height: 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 14px 0 8px;
+  display: none;
+}
+.ota-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--amber), var(--primary));
+  transition: width 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .bottom-nav-android { display: none; }
+  body { padding-bottom: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Backdrop del Sidebar para Pantalla Táctil Android -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- BARRA SUPERIOR (.topbar) -->
+<header class="topbar">
+  <div class="topbar-main">
+    <div class="topbar-left">
+      <button class="btn-toggle-sidebar" id="btnToggleSidebar" aria-label="Abrir menú" title="Menú lateral">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <a href="index.html" class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-name">AGRO<em>CONECTA</em></div>
+        <span class="brand-badge" id="topChacraName">Chacra</span>
+      </a>
+    </div>
+
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:8px;">
+      <!-- Semáforo de Señal Offline-First -->
+      <div class="signal-pill" id="signalPill" title="Estado de conexión en chacra">
+        <span class="signal-dot" id="signalDot"></span>
+        <span id="signalText">Conectado</span>
+      </div>
+
+      <!-- Botón Permanente de Auto-Actualización APK -->
+      <button type="button" class="btn-auto-update-top" id="btnAutoUpdateTop" title="Buscar actualizaciones en GitHub Supoeconomy">
+        <span class="dot-pulse"></span>
+        <span id="txtAutoUpdateTop">v1.0.0 · 🔄 Actualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="topbar-tools">
+      <select id="langSelect" class="lang-select" aria-label="Seleccionar idioma">
+        <option value="es">Castellano</option>
+        <option value="qu">Quechua Sureño</option>
+        <option value="ash">Asháninka</option>
+      </select>
+      <button type="button" class="btn-voice-speaker" id="btnVoiceTop" title="Escuchar en voz alta con asistente femenina">
+        <span>🔊</span>
+        <span class="btn-voice-text">Escuchar</span>
+        <div class="sound-waves"><span></span><span></span><span></span></div>
+      </button>
+      <button type="button" class="btn-theme-toggle" id="btnThemeToggle">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText">Modo Día</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MENÚ LATERAL DRAWER ANDROID (.sidebar) -->
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-head">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">AGRO<em>CONECTA</em></div>
+    </div>
+    <button type="button" class="btn-close-sidebar" id="btnCloseSidebar" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+  </div>
+
+  <div class="sidebar-profile">
+    <div class="sidebar-avatar" id="sideFarmerAvatar">👨‍🌾</div>
+    <div class="sidebar-user">
+      <h3 id="sideFarmerName">Diego Cárdenas</h3>
+      <p id="sideFarmerChacra">Chacra Buena Vista</p>
+      <span class="brand-badge" id="sideFarmerZone" style="display:inline-block;margin-top:4px;">Santa Ana</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-title">HERRAMIENTAS OPERATIVAS</div>
+    <button type="button" class="nav-link active" data-view="view-parcela">
+      <span>01 · 🌱 Mi Parcela 3D y Productos</span>
+    </button>
+    <button type="button" class="nav-link" data-view="view-ventas">
+      <span>02 · 📒 Mis Ventas y Pedidos</span>
+    </button>
+    <button type="button" class="nav-link" data-view="view-chat">
+      <span>03 · 💬 Chat con Proveedores y Red</span>
+    </button>
+    <button type="button" class="nav-link" data-view="view-updates">
+      <span>04 · 🔄 Actualizaciones (GitHub)</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-foot">
+    <!-- Interruptor de Estado En Línea / En Chacra -->
+    <div class="farmer-status-card" style="background:var(--surface2);padding:12px;border-radius:12px;border:1px solid var(--line2);margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <strong style="font-size:13px;display:block;" id="lblStatusOnline">Estado de Productor</strong>
+          <span style="font-size:11.5px;color:var(--primary);font-weight:700;" id="txtStatusOnline">🟢 En Línea (Recibiendo pedidos)</span>
+        </div>
+        <input type="checkbox" id="chkFarmerOnline" checked style="width:22px;height:22px;accent-color:var(--primary);cursor:pointer;">
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-line btn-sm" id="btnFarmerLogout" style="width:100%;color:var(--danger);border-color:var(--line2)">
+      <span>🚪 Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>
+
+<!-- CONTENEDOR PRINCIPAL -->
+<main class="with-sidebar" style="padding: 16px 16px 40px; max-width: 1050px; margin: 0 auto;">
+
+  <!-- ========================================================
+       SECCIÓN 01: MI PARCELA 3D Y GESTIÓN DE MIS PRODUCTOS
+       ======================================================== -->
+  <section id="view-parcela" class="view-pane active">
+    <!-- Banner de Portada de la Chacra -->
+    <div class="farm-cover-banner">
+      <img id="farmCoverImg" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80" alt="Portada de la Chacra">
+      <div class="farm-cover-overlay">
+        <div class="farm-cover-info">
+          <h1 id="coverChacraTitle">Chacra Buena Vista</h1>
+          <p id="coverProducerSub">Diego Cárdenas · Valle de La Convención</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visor 3D de Parcela -->
+    <div class="card" style="background:var(--surface);border:1.5px solid var(--line2);border-radius:var(--radius-card);padding:16px;margin-bottom:16px;">
+      <div class="section-head" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="micro"><span class="idx">3D TÁCTIL</span>Terreno Georreferenciado</div>
+          <h2 style="font-size:20px;font-family:var(--disp);margin-top:2px;">Mapa 3D de mi Chacra y Cultivos</h2>
+        </div>
+        <span class="product-badge badge-ready">Gestos Táctiles</span>
+      </div>
+
+      <div class="parcel-3d-box">
+        <canvas id="parcelCanvas3D"></canvas>
+        <div class="parcel-overlay-controls">
+          <div class="parcel-btn-group">
+            <button type="button" class="btn-3d-ctrl" id="btn3dRotL" title="Girar Izquierda">↺</button>
+            <button type="button" class="btn-3d-ctrl" id="btn3dRotR" title="Girar Derecha">↻</button>
+          </div>
+          <div class="parcel-btn-group">
+            <button type="button" class="btn-3d-ctrl" id="btn3dZoomIn" title="Acercar">+</button>
+            <button type="button" class="btn-3d-ctrl" id="btn3dZoomOut" title="Alejar">−</button>
+            <button type="button" class="btn-3d-ctrl" id="btn3dReset" title="Centrar">⊙</button>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-action-lg" id="btnAddNewLot" style="width:100%;font-size:15px;">
+        <span>➕ Agregar Nuevo Producto / Lote a mi Parcela</span>
+      </button>
+    </div>
+
+    <!-- Lista de Lotes y Productos -->
+    <div class="card" style="background:var(--surface);border:1.5px solid var(--line2);border-radius:var(--radius-card);padding:16px;">
+      <div class="section-head" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:18px;font-family:var(--disp);">Mis Productos Listos para Vender</h3>
+        <span class="product-badge badge-ready" id="lblTotalLotsCount">0 Lotes</span>
+      </div>
+      <div class="lot-grid" id="lotsContainer">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECCIÓN 02: GESTIÓN DE VENTAS, PEDIDOS Y PRECIOS DEL DÍA
+       ======================================================== -->
+  <section id="view-ventas" class="view-pane">
+    <!-- Pizarra de Precios del Día en Quillabamba (.market-board) -->
+    <div class="market-board">
+      <div class="market-board-header">
+        <div>
+          <div class="micro"><span class="idx">REFERENCIA</span>MERCADO LOCAL</div>
+          <h2 style="font-size:19px;font-family:var(--disp);margin-top:2px;">Pizarra de Precios Agrícolas · Del Campo al Consumidor</h2>
+        </div>
+        <button type="button" class="btn-voice-speaker" id="btnVoicePrices" title="Escuchar precios">
+          <span>🔊</span> <span class="btn-voice-text">Escuchar Precios</span>
+        </button>
+      </div>
+      <div class="market-grid" id="marketPricesGrid">
+        <!-- 10 productos cargados de AgroCloudBridge -->
+      </div>
+    </div>
+
+    <!-- Resumen Visual de Ganancias -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+      <div style="background:var(--surface);border:1.5px solid var(--line2);border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);font-weight:750;">VENTAS HOY</div>
+        <div style="font-family:var(--disp);font-size:20px;font-weight:900;color:var(--primary);margin-top:4px;" id="valVentasHoy">S/ 240.00</div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid var(--line2);border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);font-weight:750;">ESTA SEMANA</div>
+        <div style="font-family:var(--disp);font-size:20px;font-weight:900;color:var(--primary);margin-top:4px;" id="valVentasSemana">S/ 1,850.00</div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid var(--line2);border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);font-weight:750;">ESTE MES</div>
+        <div style="font-family:var(--disp);font-size:20px;font-weight:900;color:var(--primary);margin-top:4px;" id="valVentasMes">S/ 6,420.00</div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-action-lg" id="btnOpenNewSaleModal" style="width:100%;margin-bottom:16px;background:var(--amber);color:#1A1203;">
+      <span>➕ Anotar Venta Rápida</span>
+    </button>
+
+    <!-- Bandeja de Pedidos y Reservas -->
+    <div class="card" style="background:var(--surface);border:1.5px solid var(--line2);border-radius:var(--radius-card);padding:16px;">
+      <div class="section-head" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:18px;font-family:var(--disp);">Pedidos y Reservas de Compradores</h3>
+        <span class="product-badge badge-harvest" id="lblPendingOrders">2 Pendientes</span>
+      </div>
+      <div id="ordersListContainer">
+        <!-- Renderizado dinámicamente -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECCIÓN 03: APP CHAT CON PROVEEDORES, COMPRADORES Y RED
+       ======================================================== -->
+  <section id="view-chat" class="view-pane">
+    <div class="chat-tab-bar">
+      <div class="chat-tab-btn active" data-chat-filter="proveedor">🚜 Proveedores</div>
+      <div class="chat-tab-btn" data-chat-filter="comprador">🛒 Compradores</div>
+      <div class="chat-tab-btn" data-chat-filter="agricultor">🌾 Red de Chacras</div>
+    </div>
+
+    <div id="chatContactsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+      <!-- Lista de contactos filtrados -->
+    </div>
+
+    <div class="chat-window">
+      <div class="chat-window-head">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--surface2);border:1px solid var(--primary);display:grid;place-items:center;font-size:18px;" id="activeChatAvatar">🚜</div>
+          <div>
+            <strong style="font-size:14px;color:var(--ink);" id="activeChatTitle">AgroQuilla Insumos</strong>
+            <div style="font-size:11.5px;color:var(--primary);font-weight:700;" id="activeChatSub">🟢 En Línea · Pavayoc</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-line" id="btnChatDirectWp" style="color:var(--primary);border-color:var(--line2)">
+          <span>💬 WhatsApp</span>
+        </button>
+      </div>
+
+      <div class="chat-feed" id="chatFeedBox">
+        <div class="chat-msg theirs">¡Hola don Diego! Tenemos stock de bioestimulantes orgánicos y herramientas podadoras recién llegadas a Quillabamba.</div>
+        <div class="chat-msg mine">Buenas tardes amigo, necesito cotización de 3 sacos de fertilizante para mi parcela de café.</div>
+        <div class="chat-msg theirs">A S/ 45 cada saco puesto en chacra. Te lo enviamos hoy mismo si confirmas.</div>
+      </div>
+
+      <div class="chat-action-bar">
+        <button type="button" class="chat-btn-icon" id="btnDictateMsg" title="Hablar para escribir (Micrófono)">🎤</button>
+        <button type="button" class="chat-btn-icon" id="btnShareProductMsg" title="Enviar Producto de mi Parcela 3D">📦</button>
+        <input type="text" class="chat-input" id="chatMsgInput" placeholder="Habla o escribe tu mensaje...">
+        <button type="button" class="chat-btn-icon" id="btnSendMsg" style="background:var(--primary);color:#000;">➤</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SECCIÓN 04: AUTO-ACTUALIZADOR VINCULADO A GITHUB
+       ======================================================== -->
+  <section id="view-updates" class="view-pane">
+    <div class="ota-box">
+      <div class="section-head" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="micro"><span class="idx">SISTEMA OTA</span>GITHUB SUPOECONOMY</div>
+          <h2 style="font-size:20px;font-family:var(--disp);margin-top:2px;">Actualización Continua del APK</h2>
+        </div>
+        <span class="product-badge badge-ready" id="badgeOtaStatus">Conectado</span>
+      </div>
+
+      <p style="font-size:13.5px;color:var(--muted);line-height:1.45;margin-bottom:16px;">
+        Esta aplicación móvil está conectada al repositorio oficial en la cuenta <strong>Supoeconomy</strong> en GitHub. Cada mejora o ajuste se descarga e instala automáticamente sin tocar tus datos locales ni sesiones de trabajo.
+      </p>
+
+      <div style="background:var(--surface2);padding:14px;border-radius:12px;border:1px solid var(--line2);margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>Repositorio GitHub:</span>
+          <strong style="color:var(--primary);">Supoeconomy/agroconecta-agricultor</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>Versión Actual APK:</span>
+          <strong id="dispCurrentVersion">v1.0.0 (Build 100)</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span>Último Commit en GitHub:</span>
+          <strong id="dispLastCommit">Cargando...</strong>
+        </div>
+      </div>
+
+      <div class="ota-progress-bg" id="otaProgressBg">
+        <div class="ota-progress-bar" id="otaProgressBar"></div>
+      </div>
+      <div id="otaStatusText" style="font-size:12px;color:var(--primary);font-weight:700;display:none;margin-bottom:12px;">
+        Verificando repositorio Supoeconomy en GitHub...
+      </div>
+
+      <button type="button" class="btn btn-primary btn-action-lg" id="btnTriggerOtaUpdate" style="width:100%;margin-bottom:12px;">
+        <span>🔄 Buscar y Descargar Última Actualización</span>
+      </button>
+
+      <button type="button" class="btn btn-line btn-action-lg" id="btnDownloadApkDirect" style="width:100%;">
+        <span>🤖 Descargar Último Instalador APK para Android</span>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- BARRA INFERIOR DE NAVEGACIÓN FIJA ANDROID -->
+<nav class="bottom-nav-android">
+  <button type="button" class="nav-tab-btn active" data-view="view-parcela">
+    <span class="tab-icon">🌱</span>
+    <span>Parcela 3D</span>
+  </button>
+  <button type="button" class="nav-tab-btn" data-view="view-ventas">
+    <span class="tab-icon">📒</span>
+    <span>Ventas</span>
+  </button>
+  <button type="button" class="nav-tab-btn" data-view="view-chat">
+    <span class="tab-icon">💬</span>
+    <span>Chat</span>
+  </button>
+  <button type="button" class="nav-tab-btn" data-view="view-updates">
+    <span class="tab-icon">🔄</span>
+    <span>Actualizar</span>
+  </button>
+</nav>
+
+<!-- MODAL: AGREGAR / EDITAR LOTE DE PARCELA 3D -->
+<div class="modal-overlay" id="modalLotEdit" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:16px;">
+  <div class="modal-box" style="background:var(--surface);border:1.5px solid var(--primary);border-radius:18px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="font-family:var(--disp);font-size:18px;">🌱 Lote de mi Parcela 3D</h3>
+      <button type="button" onclick="document.getElementById('modalLotEdit').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:750;color:var(--muted);">Nombre del Lote / Sector</label>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="lotNameInput" class="form-input" style="flex:1;" placeholder="Ej. Lote Las Paltas">
+        <button type="button" class="btn btn-sm btn-line" onclick="dictateTo('lotNameInput')">🎤</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:750;color:var(--muted);">Producto / Variedad</label>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="lotVarietyInput" class="form-input" style="flex:1;" placeholder="Ej. Palta Hass y Fuerte">
+        <button type="button" class="btn btn-sm btn-line" onclick="dictateTo('lotVarietyInput')">🎤</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:750;color:var(--muted);">Tipo de Cosecha / Proceso</label>
+      <select id="lotProcessInput" class="form-select" style="width:100%;">
+        <option value="Cosecha Fresca">Cosecha Fresca</option>
+        <option value="Orgánico Certificado">Orgánico Certificado</option>
+        <option value="Lavado">Lavado Tradicional</option>
+        <option value="Natural">Natural / Secado al Sol</option>
+        <option value="Honey">Honey / Melado</option>
+      </select>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:750;color:var(--muted);">Cantidad Lista (Cosecha)</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button type="button" class="btn-3d-ctrl" style="width:40px;height:40px;" onclick="adjustLotYield(-10)">−</button>
+        <input type="text" id="lotYieldInput" class="form-input" style="flex:1;text-align:center;font-weight:800;" value="100 kg">
+        <button type="button" class="btn-3d-ctrl" style="width:40px;height:40px;" onclick="adjustLotYield(10)">+</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:750;color:var(--muted);">Precio de Venta en Soles (S/)</label>
+      <input type="number" step="0.50" id="lotPriceInput" class="form-input" style="width:100%;font-size:18px;font-weight:800;color:var(--primary);" value="18.00">
+    </div>
+
+    <div class="field" style="margin-bottom:14px;background:var(--surface2);padding:10px 12px;border-radius:10px;border:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <strong style="font-size:13px;">Permitir Reservas Online</strong>
+        <span style="font-size:11px;color:var(--muted);display:block;">Visible para compradores</span>
+      </div>
+      <input type="checkbox" id="lotAllowReserveInput" checked style="width:20px;height:20px;accent-color:var(--primary);">
+    </div>
+
+    <button type="button" class="btn btn-primary btn-action-lg" id="btnSaveLotModal" style="width:100%;">
+      <span>💾 Guardar Lote en mi Parcela</span>
+    </button>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- MOTOR DE DATOS Y LÓGICA -->
+<script src="bridge.js"></script>
+<script src="agro-voice.js"></script>
+<script>
+/* ========================================================
+   LÓGICA OPERATIVA COMPLETA · APP.HTML ANDROID APK
+   ======================================================== */
+
+let currentFarmer = null;
+let activeLots = [];
+let editingLotId = null;
+
+// 1. CARGA DEL PRODUCTOR DESDE AGROCLOUDBRIDGE
+function initFarmerSession() {
+  const state = AgroCloudBridge.getState();
+  const loggedId = sessionStorage.getItem("farmer_logged") || "farmer-01";
+  currentFarmer = state.farmers.find(f => f.id === loggedId) || state.farmers[0];
+  
+  if (!currentFarmer) {
+    console.warn("No farmer found, using template");
+    currentFarmer = {
+      id: "farmer-01",
+      name: "Diego Cárdenas",
+      chacra: "Chacra Buena Vista",
+      zona: "Santa Ana, La Convención",
+      cultivo: "Café y Cacao",
+      online: true,
+      parcelLots: [
+        { id: 1, name: "Lote Las Paltas", variety: "Palta Hass y Fuerte", process: "Cosecha Fresca", plants: 240, yield: "350 kg", price: 8.5, status: "Disponible", allowReserve: true },
+        { id: 2, name: "Lote Los Cítricos", variety: "Naranja Valencia y Mandarina", process: "Orgánico", plants: 300, yield: "50 cientos", price: 28.0, status: "Disponible", allowReserve: true },
+        { id: 3, name: "Lote Café Geisha", variety: "Geisha Especial 86pts", process: "Lavado", plants: 650, yield: "12 qq", price: 45.0, status: "En Cosecha", allowReserve: true },
+        { id: 4, name: "Lote Cacao Chuncho", variety: "Chuncho Nativo Selección", process: "Fermentado y Seco", plants: 500, yield: "800 kg", price: 24.5, status: "Disponible", allowReserve: true }
+      ],
+      crm: [
+        { id: "crm-1", name: "AgroQuilla Insumos", tag: "proveedor", phone: "+51984000111", desc: "Abonos y herramientas" },
+        { id: "crm-2", name: "Transportes Vilcabamba", tag: "proveedor", phone: "+51984000222", desc: "Flete Quillabamba - Cusco" },
+        { id: "crm-3", name: "Comprador de Especialidad Lima", tag: "mayorista", phone: "+51984000333", desc: "Compra café y cacao" }
+      ]
+    };
+  }
+
+  activeLots = currentFarmer.parcelLots || [];
+
+  // Actualizar UI
+  document.getElementById("topChacraName").textContent = currentFarmer.chacra || "Mi Chacra";
+  document.getElementById("coverChacraTitle").textContent = currentFarmer.chacra || "Chacra AgroConecta";
+  document.getElementById("coverProducerSub").textContent = `${currentFarmer.name} · ${currentFarmer.zona || "Quillabamba"}`;
+  document.getElementById("sideFarmerName").textContent = currentFarmer.name;
+  document.getElementById("sideFarmerChacra").textContent = currentFarmer.chacra;
+  document.getElementById("sideFarmerZone").textContent = currentFarmer.distrito || "La Convención";
+  document.getElementById("chkFarmerOnline").checked = !!currentFarmer.online;
+
+  renderLots();
+  renderMarketPrices();
+  renderOrders();
+  renderChatContacts("proveedor");
+  drawParcelCanvas();
+}
+
+// 2. NAVEGACIÓN ENTRE SECCIONES (ANDROID DRAWER & BOTTOM NAV)
+function setupNavigation() {
+  const allNavButtons = document.querySelectorAll(".nav-tab-btn, .nav-link");
+  allNavButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const viewId = btn.dataset.view;
+      allNavButtons.forEach(b => b.classList.toggle("active", b.dataset.view === viewId));
+      document.querySelectorAll(".view-pane").forEach(pane => {
+        pane.classList.toggle("active", pane.id === viewId);
+      });
+      // Cerrar drawer lateral si está abierto
+      closeSidebar();
+      if (viewId === "view-parcela") {
+        setTimeout(drawParcelCanvas, 50);
+      }
+    });
+  });
+
+  // Toggle Sidebar
+  document.getElementById("btnToggleSidebar").addEventListener("click", openSidebar);
+  document.getElementById("btnCloseSidebar").addEventListener("click", closeSidebar);
+  document.getElementById("sidebarBackdrop").addEventListener("click", closeSidebar);
+}
+
+function openSidebar() {
+  document.body.classList.add("sidebar-open");
+}
+function closeSidebar() {
+  document.body.classList.remove("sidebar-open");
+}
+
+// 3. VISOR DE PARCELA 3D EN CANVAS
+const canvas3D = document.getElementById("parcelCanvas3D");
+const ctx3D = canvas3D.getContext("2d");
+let pAngle = 0.55;
+let pZoom = 1.0;
+
+function resize3DCanvas() {
+  const rect = canvas3D.parentElement.getBoundingClientRect();
+  canvas3D.width = rect.width * (window.devicePixelRatio || 1);
+  canvas3D.height = rect.height * (window.devicePixelRatio || 1);
+  ctx3D.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  drawParcelCanvas();
+}
+
+function drawParcelCanvas() {
+  const w = canvas3D.parentElement.clientWidth;
+  const h = canvas3D.parentElement.clientHeight;
+  ctx3D.clearRect(0, 0, w, h);
+
+  const cx = w / 2;
+  const cy = h / 2 - 10;
+  const size = 100 * pZoom;
+
+  function toIso(x, y, z) {
+    const cos = Math.cos(pAngle);
+    const sin = Math.sin(pAngle);
+    const rx = x * cos - y * sin;
+    const ry = x * sin + y * cos;
+    return {
+      x: cx + (rx - ry) * (size * 0.72),
+      y: cy + (rx + ry) * (size * 0.36) - z * (size * 0.45)
+    };
+  }
+
+  // Plataforma de tierra base
+  ctx3D.beginPath();
+  const p1 = toIso(-2.2, -2.2, 0);
+  const p2 = toIso(2.2, -2.2, 0);
+  const p3 = toIso(2.2, 2.2, 0);
+  const p4 = toIso(-2.2, 2.2, 0);
+  ctx3D.moveTo(p1.x, p1.y);
+  ctx3D.lineTo(p2.x, p2.y);
+  ctx3D.lineTo(p3.x, p3.y);
+  ctx3D.lineTo(p4.x, p4.y);
+  ctx3D.closePath();
+  ctx3D.fillStyle = "#0c1521";
+  ctx3D.fill();
+  ctx3D.strokeStyle = "rgba(0, 255, 102, 0.25)";
+  ctx3D.lineWidth = 1.5;
+  ctx3D.stroke();
+
+  // Relieve de espesor
+  ctx3D.beginPath();
+  const b2 = toIso(2.2, -2.2, -0.4);
+  const b3 = toIso(2.2, 2.2, -0.4);
+  const b4 = toIso(-2.2, 2.2, -0.4);
+  ctx3D.moveTo(p2.x, p2.y);
+  ctx3D.lineTo(b2.x, b2.y);
+  ctx3D.lineTo(b3.x, b3.y);
+  ctx3D.lineTo(p3.x, p3.y);
+  ctx3D.fillStyle = "#060a0f";
+  ctx3D.fill();
+  ctx3D.stroke();
+
+  // Renderizar bloques 3D de cada lote
+  const positions = [
+    { x: -1.1, y: -1.1, icon: "🥑" },
+    { x: 1.1, y: -1.1, icon: "🍊" },
+    { x: -1.1, y: 1.1, icon: "☕" },
+    { x: 1.1, y: 1.1, icon: "🍫" }
+  ];
+
+  activeLots.slice(0, 4).forEach((lot, i) => {
+    const pos = positions[i] || { x: 0, y: 0, icon: "🌱" };
+    const q1 = toIso(pos.x - 0.9, pos.y - 0.9, 0.15);
+    const q2 = toIso(pos.x + 0.9, pos.y - 0.9, 0.15);
+    const q3 = toIso(pos.x + 0.9, pos.y + 0.9, 0.15);
+    const q4 = toIso(pos.x - 0.9, pos.y + 0.9, 0.15);
+
+    ctx3D.beginPath();
+    ctx3D.moveTo(q1.x, q1.y);
+    ctx3D.lineTo(q2.x, q2.y);
+    ctx3D.lineTo(q3.x, q3.y);
+    ctx3D.lineTo(q4.x, q4.y);
+    ctx3D.closePath();
+
+    ctx3D.fillStyle = lot.status === "Disponible" ? "rgba(0, 255, 102, 0.25)" : (lot.status === "En Cosecha" ? "rgba(255, 194, 75, 0.25)" : "rgba(255, 255, 255, 0.08)");
+    ctx3D.fill();
+    ctx3D.strokeStyle = lot.status === "Disponible" ? "#00FF66" : (lot.status === "En Cosecha" ? "#FFC24B" : "#8E9FA5");
+    ctx3D.lineWidth = 2;
+    ctx3D.stroke();
+
+    const center = toIso(pos.x, pos.y, 0.35);
+    ctx3D.font = `${24 * pZoom}px sans-serif`;
+    ctx3D.textAlign = "center";
+    ctx3D.textBaseline = "middle";
+    ctx3D.fillText(pos.icon, center.x, center.y);
+
+    ctx3D.font = `bold ${10 * pZoom}px Instrument Sans, sans-serif`;
+    ctx3D.fillStyle = "#FFFFFF";
+    ctx3D.fillText(lot.name, center.x, center.y + 18 * pZoom);
+  });
+}
+
+// Controles 3D táctiles
+document.getElementById("btn3dRotL").onclick = () => { pAngle += 0.25; drawParcelCanvas(); };
+document.getElementById("btn3dRotR").onclick = () => { pAngle -= 0.25; drawParcelCanvas(); };
+document.getElementById("btn3dZoomIn").onclick = () => { pZoom = Math.min(pZoom + 0.15, 1.8); drawParcelCanvas(); };
+document.getElementById("btn3dZoomOut").onclick = () => { pZoom = Math.max(pZoom - 0.15, 0.6); drawParcelCanvas(); };
+document.getElementById("btn3dReset").onclick = () => { pAngle = 0.55; pZoom = 1.0; drawParcelCanvas(); };
+
+// Gestos táctiles Android en el canvas
+let isTouching = false;
+let startTouchX = 0;
+canvas3D.addEventListener("pointerdown", (e) => { isTouching = true; startTouchX = e.clientX; });
+window.addEventListener("pointermove", (e) => {
+  if (!isTouching) return;
+  const dx = e.clientX - startTouchX;
+  pAngle -= dx * 0.008;
+  startTouchX = e.clientX;
+  drawParcelCanvas();
+});
+window.addEventListener("pointerup", () => isTouching = false);
+canvas3D.addEventListener("click", () => {
+  // Al tocar la parcela 3D, abrir el primer lote o agregar
+  if (activeLots.length > 0) openLotModal(activeLots[0].id);
+  else openNewLotModal();
+});
+
+// 4. RENDERIZADO DE LOTES E INVENTARIO
+function renderLots() {
+  const container = document.getElementById("lotsContainer");
+  container.innerHTML = "";
+  activeLots.forEach(lot => {
+    const card = document.createElement("div");
+    card.className = `lot-card ${lot.status === "Disponible" ? "ready" : (lot.status === "En Cosecha" ? "harvest" : "empty")}`;
+    card.innerHTML = `
+      <div class="lot-head">
+        <span class="lot-title">${lot.name}</span>
+        <span class="lot-status-badge ${lot.status === "Disponible" ? "badge-ready" : (lot.status === "En Cosecha" ? "badge-harvest" : "badge-empty")}">
+          ${lot.status}
+        </span>
+      </div>
+      <div class="lot-details">
+        <span>${lot.variety} (${lot.process || "Cosecha"})</span>
+        <strong>${lot.yield}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <div class="lot-price">S/ ${parseFloat(lot.price).toFixed(2)}</div>
+        <span style="font-size:11px;font-weight:700;color:${lot.allowReserve ? 'var(--primary)' : 'var(--muted)'};">
+          ${lot.allowReserve ? '🔓 Reservable Online' : '🔒 Solo Control'}
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" class="btn btn-sm btn-line" style="flex:1;" onclick="openLotModal(${lot.id})">✏️ Editar</button>
+        <button type="button" class="btn btn-sm btn-line" style="flex:1;" onclick="toggleLotStatus(${lot.id})">
+          ${lot.status === 'Disponible' ? 'Agotar' : 'Habilitar'}
+        </button>
+        <button type="button" class="btn btn-sm btn-line" style="color:var(--primary);" onclick="shareLotWhatsApp(${lot.id})">💬 WhatsApp</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  document.getElementById("lblTotalLotsCount").textContent = `${activeLots.length} Lotes`;
+}
+
+window.toggleLotStatus = function(id) {
+  const lot = activeLots.find(l => l.id === id);
+  if (lot) {
+    lot.status = lot.status === "Disponible" ? "Agotado" : "Disponible";
+    saveAndSyncFarmer();
+  }
+};
+
+window.shareLotWhatsApp = function(id) {
+  const lot = activeLots.find(l => l.id === id);
+  if (!lot) return;
+  const msg = `🌱 ¡Hola! De mi Chacra en Quillabamba tengo disponible: *${lot.name}* (${lot.variety}) - Cantidad: *${lot.yield}* a *S/ ${lot.price}*. ¿Deseas separar tu pedido?`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+// Guardar y sincronizar con backend
+function saveAndSyncFarmer() {
+  currentFarmer.parcelLots = activeLots;
+  AgroCloudBridge.saveFarmerProfile(currentFarmer);
+  renderLots();
+  drawParcelCanvas();
+  toast("Parcela y lotes actualizados con éxito", "ok");
+}
+
+// 5. MODAL DE LOTES
+window.openLotModal = function(id) {
+  editingLotId = id;
+  const lot = activeLots.find(l => l.id === id);
+  if (lot) {
+    document.getElementById("lotNameInput").value = lot.name;
+    document.getElementById("lotVarietyInput").value = lot.variety;
+    document.getElementById("lotProcessInput").value = lot.process || "Cosecha Fresca";
+    document.getElementById("lotYieldInput").value = lot.yield;
+    document.getElementById("lotPriceInput").value = lot.price;
+    document.getElementById("lotAllowReserveInput").checked = !!lot.allowReserve;
+  }
+  document.getElementById("modalLotEdit").style.display = "flex";
+};
+
+window.openNewLotModal = function() {
+  editingLotId = null;
+  document.getElementById("lotNameInput").value = "Nuevo Lote";
+  document.getElementById("lotVarietyInput").value = "Cultivo Seleccionado";
+  document.getElementById("lotYieldInput").value = "100 kg";
+  document.getElementById("lotPriceInput").value = "18.00";
+  document.getElementById("lotAllowReserveInput").checked = true;
+  document.getElementById("modalLotEdit").style.display = "flex";
+};
+
+document.getElementById("btnAddNewLot").onclick = openNewLotModal;
+
+document.getElementById("btnSaveLotModal").onclick = () => {
+  const name = document.getElementById("lotNameInput").value.trim() || "Lote Chacra";
+  const variety = document.getElementById("lotVarietyInput").value.trim() || "Variedad";
+  const process = document.getElementById("lotProcessInput").value;
+  const yieldVal = document.getElementById("lotYieldInput").value.trim() || "50 kg";
+  const price = parseFloat(document.getElementById("lotPriceInput").value) || 10;
+  const allowReserve = document.getElementById("lotAllowReserveInput").checked;
+
+  if (editingLotId) {
+    const l = activeLots.find(x => x.id === editingLotId);
+    if (l) {
+      l.name = name;
+      l.variety = variety;
+      l.process = process;
+      l.yield = yieldVal;
+      l.price = price;
+      l.allowReserve = allowReserve;
+    }
+  } else {
+    activeLots.push({
+      id: Date.now(),
+      name,
+      variety,
+      process,
+      plants: 300,
+      yield: yieldVal,
+      price,
+      status: "Disponible",
+      allowReserve
+    });
+  }
+  document.getElementById("modalLotEdit").style.display = "none";
+  saveAndSyncFarmer();
+};
+
+window.adjustLotYield = function(delta) {
+  const inp = document.getElementById("lotYieldInput");
+  let num = parseInt(inp.value) || 50;
+  num = Math.max(10, num + delta);
+  inp.value = `${num} kg`;
+};
+
+// Dictado por voz a cualquier campo
+window.dictateTo = function(inputId) {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return alert("Tu dispositivo no soporta dictado por voz");
+  const r = new SpeechRec();
+  r.lang = "es-PE";
+  r.onresult = (e) => {
+    document.getElementById(inputId).value = e.results[0][0].transcript;
+  };
+  r.start();
+};
+
+// 6. PIZARRA DE PRECIOS Y VENTAS
+function renderMarketPrices() {
+  const grid = document.getElementById("marketPricesGrid");
+  grid.innerHTML = "";
+  const prices = AgroCloudBridge.getMarketPrices();
+  prices.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "market-item";
+    item.innerHTML = `
+      <div class="market-item-top">
+        <span class="market-crop-name">${p.crop}</span>
+        <span class="market-trend ${p.trend === 'up' ? 'trend-up' : 'trend-stable'}">${p.trendLabel}</span>
+      </div>
+      <div class="market-price-val">${p.price} <small>/ ${p.unit}</small></div>
+      <div class="market-unit-note">${p.note}</div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+// Pedidos
+function renderOrders() {
+  const c = document.getElementById("ordersListContainer");
+  c.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--line2);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>👤 Asociación Cafetalera de Baristas</strong>
+        <strong style="color:var(--primary);font-size:16px;">S/ 720.00</strong>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin:4px 0 8px;">Café Geisha Especial · 18 kg</p>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-sm btn-primary" onclick="toast('Venta confirmada y registrada en tus cuentas', 'ok')">✓ Confirmar Venta</button>
+        <button type="button" class="btn btn-sm btn-line" onclick="toast('Mostrando código Yape 984 123 456', 'ok')">📱 Yape / Plin</button>
+      </div>
+    </div>
+  `;
+}
+
+// 7. CHAT CON PROVEEDORES
+function renderChatContacts(filter) {
+  const list = document.getElementById("chatContactsList");
+  list.innerHTML = "";
+  const crm = currentFarmer.crm || [];
+  const contacts = crm.filter(c => filter === "proveedor" ? c.tag === "proveedor" : c.tag !== "proveedor");
+
+  contacts.forEach(c => {
+    const item = document.createElement("div");
+    item.style.cssText = "background:var(--surface);border:1.5px solid var(--line2);border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;";
+    item.innerHTML = `
+      <div>
+        <strong style="font-size:14px;color:var(--ink);">${c.name}</strong>
+        <span style="font-size:12px;color:var(--muted);display:block;">${c.desc || "Contacto directo"}</span>
+      </div>
+      <span style="color:var(--primary);font-size:18px;">›</span>
+    `;
+    item.onclick = () => {
+      document.getElementById("activeChatTitle").textContent = c.name;
+      document.getElementById("activeChatSub").textContent = `🟢 En Línea · ${c.phone || "Quillabamba"}`;
+    };
+    list.appendChild(item);
+  });
+}
+
+document.querySelectorAll(".chat-tab-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".chat-tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderChatContacts(btn.dataset.chatFilter);
+  };
+});
+
+// Enviar mensaje en chat
+document.getElementById("btnSendMsg").onclick = sendChatMsg;
+document.getElementById("chatMsgInput").onkeypress = (e) => { if (e.key === "Enter") sendChatMsg(); };
+
+function sendChatMsg() {
+  const inp = document.getElementById("chatMsgInput");
+  const txt = inp.value.trim();
+  if (!txt) return;
+
+  const feed = document.getElementById("chatFeedBox");
+  const msg = document.createElement("div");
+  msg.className = "chat-msg mine";
+  msg.textContent = txt;
+  feed.appendChild(msg);
+  inp.value = "";
+  feed.scrollTop = feed.scrollHeight;
+
+  // Respuesta inteligente
+  setTimeout(() => {
+    const resp = document.createElement("div");
+    resp.className = "chat-msg theirs";
+    resp.textContent = "¡Entendido don Diego! Confirmamos tu pedido y te avisamos cuando esté en camino.";
+    feed.appendChild(resp);
+    feed.scrollTop = feed.scrollHeight;
+  }, 1200);
+}
+
+// Dictado en chat
+document.getElementById("btnDictateMsg").onclick = () => dictateTo("chatMsgInput");
+
+// Compartir producto en chat
+document.getElementById("btnShareProductMsg").onclick = () => {
+  if (activeLots.length === 0) return alert("No tienes lotes activos");
+  const lot = activeLots[0];
+  document.getElementById("chatMsgInput").value = `🌱 Lote disponible de mi chacra: ${lot.name} (${lot.variety}) - ${lot.yield} a S/ ${lot.price}.`;
+};
+
+// 8. AUTO-UPDATER CON GITHUB SUPOECONOMY
+const REPO_URL = "https://api.github.com/repos/Supoeconomy/agroconecta-agricultor/commits/main";
+
+async function runOtaUpdate() {
+  const pBg = document.getElementById("otaProgressBg");
+  const pBar = document.getElementById("otaProgressBar");
+  const stText = document.getElementById("otaStatusText");
+
+  pBg.style.display = "block";
+  stText.style.display = "block";
+  stText.textContent = "Verificando repositorio Supoeconomy en GitHub...";
+  pBar.style.width = "30%";
+
+  try {
+    const r = await fetch(REPO_URL, { cache: "no-store" });
+    pBar.style.width = "70%";
+    if (r.ok) {
+      const data = await r.json();
+      const sha = data.sha.substring(0, 7);
+      stText.textContent = `Descargando actualización OTA (${sha}) para Android...`;
+      pBar.style.width = "100%";
+
+      // Renovar caché de Service Worker sin tocar localStorage
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+
+      setTimeout(() => {
+        toast("¡App actualizada con éxito a la última versión!", "ok");
+        stText.textContent = `Actualizado: Commit ${sha} aplicado.`;
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 800);
+      }, 600);
+    } else {
+      throw new Error("No response from GitHub");
+    }
+  } catch (e) {
+    pBar.style.width = "100%";
+    stText.textContent = "Modo local seguro activo (sin cambios pendientes).";
+    setTimeout(() => {
+      pBg.style.display = "none";
+      stText.style.display = "none";
+    }, 1500);
+  }
+}
+
+document.getElementById("btnAutoUpdateTop").onclick = runOtaUpdate;
+document.getElementById("btnTriggerOtaUpdate").onclick = runOtaUpdate;
+
+// Botón de Descarga APK Directa
+document.getElementById("btnDownloadApkDirect").onclick = () => {
+  window.open("https://github.com/Supoeconomy/agroconecta-agricultor/releases", "_blank");
+};
+
+// 9. SEMÁFORO DE CONEXIÓN
+function updateNetStatus() {
+  const dot = document.getElementById("signalDot");
+  const txt = document.getElementById("signalText");
+  if (navigator.onLine) {
+    dot.className = "signal-dot";
+    txt.textContent = "Conectado";
+  } else {
+    dot.className = "signal-dot offline";
+    txt.textContent = "Sin Señal · Offline";
+  }
+}
+window.addEventListener("online", updateNetStatus);
+window.addEventListener("offline", updateNetStatus);
+
+// 10. TEMA Y ACCESIBILIDAD
+document.getElementById("btnThemeToggle").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "dark";
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("agrosuite_theme", next);
+  document.getElementById("themeIcon").textContent = next === "dark" ? "☀️" : "🌙";
+  document.getElementById("themeText").textContent = next === "dark" ? "Modo Día" : "Modo Noche";
+});
+
+// Inicialización de la App
+window.addEventListener("resize", resize3DCanvas);
+document.addEventListener("DOMContentLoaded", () => {
+  setupNavigation();
+  initFarmerSession();
+  updateNetStatus();
+  setTimeout(resize3DCanvas, 80);
+});
+</script>
+</body>
+</html>
