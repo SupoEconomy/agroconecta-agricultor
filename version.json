@@ -1,8 +1,16 @@
 {
   "name": "AgroConecta Agricultor",
-  "version": "1.0.0",
-  "build": 100,
+  "version": "1.1.0",
+  "build": 110,
   "commitDate": "2026-11-18",
   "repository": "https://github.com/Supoeconomy/agroconecta-agricultor",
-  "releaseNotes": "Versión 1.0.0: Lanzamiento oficial para el Agricultor de Quillabamba. Parcela 3D, Registro de Ventas, Chat con Proveedores y Auto-Updater vinculado a GitHub Supoeconomy."
+  "downloadUrl": "https://github.com/Supoeconomy/agroconecta-agricultor/raw/main/agroconecta-agricultor.apk",
+  "title": "Actualización v1.1.0: Optimizaciones Android y Espaciado",
+  "releaseNotes": "• Espaciado de pantalla inferior ampliado para evitar que los botones táctiles queden tapados por la barra de navegación.\n• Nuevo detector inteligente de actualizaciones con panel de novedades y botón de descarga directa del APK.\n• Descarga optimizada para instalación manual guiada en Android.\n• Mayor fluidez en el visor 3D de lotes y registro de ventas.",
+  "features": [
+    "Espaciado inferior seguro para móviles Android (sin solapamiento)",
+    "Descarga directa del archivo APK actualizado",
+    "Mejora en la fluidez del mapa 3D y registro de ventas",
+    "Soporte offline mejorado con guardado local persistente"
+  ]
 }

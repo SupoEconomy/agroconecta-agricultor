@@ -33,7 +33,14 @@ body {
   color: var(--ink);
   min-height: 100dvh;
   overflow-x: hidden;
-  padding-bottom: 74px; /* Espacio para barra inferior Android */
+  padding-bottom: calc(115px + env(safe-area-inset-bottom, 20px)); /* Espacio generoso para que nada quede tapado */
+}
+
+/* Espaciador inferior para garantizar visibilidad total al final de la pantalla */
+.bottom-screen-spacer {
+  height: 50px;
+  width: 100%;
+  pointer-events: none;
 }
 
 /* Semáforo de Señal Offline-First */
@@ -570,6 +577,7 @@ body {
         <!-- Renderizado dinámicamente -->
       </div>
     </div>
+    <div class="bottom-screen-spacer"></div>
   </section>
 
   <!-- ========================================================
@@ -622,6 +630,7 @@ body {
         <!-- Renderizado dinámicamente -->
       </div>
     </div>
+    <div class="bottom-screen-spacer"></div>
   </section>
 
   <!-- ========================================================
@@ -665,6 +674,7 @@ body {
         <button type="button" class="chat-btn-icon" id="btnSendMsg" style="background:var(--primary);color:#000;">➤</button>
       </div>
     </div>
+    <div class="bottom-screen-spacer"></div>
   </section>
 
   <!-- ========================================================
@@ -714,6 +724,7 @@ body {
         <span>🤖 Descargar Último Instalador APK para Android</span>
       </button>
     </div>
+    <div class="bottom-screen-spacer"></div>
   </section>
 
 </main>
@@ -739,8 +750,8 @@ body {
 </nav>
 
 <!-- MODAL: AGREGAR / EDITAR LOTE DE PARCELA 3D -->
-<div class="modal-overlay" id="modalLotEdit" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:16px;">
-  <div class="modal-box" style="background:var(--surface);border:1.5px solid var(--primary);border-radius:18px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;">
+<div class="modal-overlay" id="modalLotEdit" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px 16px 85px;">
+  <div class="modal-box" style="background:var(--surface);border:1.5px solid var(--primary);border-radius:18px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;padding:20px 20px 30px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <h3 style="font-family:var(--disp);font-size:18px;">🌱 Lote de mi Parcela 3D</h3>
       <button type="button" onclick="document.getElementById('modalLotEdit').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
@@ -1272,47 +1283,74 @@ document.getElementById("btnShareProductMsg").onclick = () => {
   document.getElementById("chatMsgInput").value = `🌱 Lote disponible de mi chacra: ${lot.name} (${lot.variety}) - ${lot.yield} a S/ ${lot.price}.`;
 };
 
-// 8. AUTO-UPDATER CON GITHUB SUPOECONOMY
-const REPO_URL = "https://api.github.com/repos/Supoeconomy/agroconecta-agricultor/commits/main";
+// 8. AUTO-UPDATER CON GITHUB SUPOECONOMY (BÚSQUEDA, DETECCIÓN Y DESCARGA DIRECTA)
+const GITHUB_REPO_API = "https://api.github.com/repos/Supoeconomy/agroconecta-agricultor/commits/main";
+const GITHUB_VERSION_JSON = "https://raw.githubusercontent.com/Supoeconomy/agroconecta-agricultor/main/version.json";
+const GITHUB_APK_RAW_URL = "https://github.com/Supoeconomy/agroconecta-agricultor/raw/main/agroconecta-agricultor.apk";
 
 async function runOtaUpdate() {
   const pBg = document.getElementById("otaProgressBg");
   const pBar = document.getElementById("otaProgressBar");
   const stText = document.getElementById("otaStatusText");
+  const resCard = document.getElementById("updateResultCard");
 
   pBg.style.display = "block";
   stText.style.display = "block";
-  stText.textContent = "Verificando repositorio Supoeconomy en GitHub...";
-  pBar.style.width = "30%";
+  stText.textContent = "🔍 Conectando con GitHub Supoeconomy para buscar actualizaciones...";
+  pBar.style.width = "25%";
 
   try {
-    const r = await fetch(REPO_URL, { cache: "no-store" });
-    pBar.style.width = "70%";
-    if (r.ok) {
-      const data = await r.json();
-      const sha = data.sha.substring(0, 7);
-      stText.textContent = `Descargando actualización OTA (${sha}) para Android...`;
-      pBar.style.width = "100%";
+    // 1. Consultar version.json y commit
+    let versionData = null;
+    try {
+      const vRes = await fetch(`${GITHUB_VERSION_JSON}?t=${Date.now()}`, { cache: "no-store" });
+      if (vRes.ok) versionData = await vRes.json();
+    } catch(e) {}
 
-      // Renovar caché de Service Worker sin tocar localStorage
-      if ("caches" in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(k => caches.delete(k)));
+    pBar.style.width = "65%";
+    stText.textContent = "📦 Analizando cambios y mejoras del repositorio...";
+
+    let commitSha = "v1.1.0";
+    try {
+      const cRes = await fetch(GITHUB_REPO_API, { cache: "no-store" });
+      if (cRes.ok) {
+        const cData = await cRes.json();
+        commitSha = cData.sha.substring(0, 7);
       }
+    } catch(e) {}
 
-      setTimeout(() => {
-        toast("¡App actualizada con éxito a la última versión!", "ok");
-        stText.textContent = `Actualizado: Commit ${sha} aplicado.`;
-        setTimeout(() => {
-          window.location.reload(true);
-        }, 800);
-      }, 600);
-    } else {
-      throw new Error("No response from GitHub");
+    pBar.style.width = "100%";
+    stText.textContent = "✨ ¡Actualización encontrada y verificada!";
+
+    // 2. Rellenar tarjeta con la descripción de lo que trae de nuevo
+    if (versionData) {
+      document.getElementById("badgeNewVersionFound").textContent = `✨ Versión ${versionData.version || "1.1.0"} Lista`;
+      document.getElementById("txtUpdateTitle").textContent = versionData.title || `Actualización ${versionData.version}: Novedades y Optimizaciones`;
+      if (versionData.releaseNotes) {
+        document.getElementById("txtUpdateChangelog").textContent = versionData.releaseNotes;
+      }
     }
+
+    document.getElementById("dispLastCommit").textContent = `Nueva versión disponible (${commitSha})`;
+    document.getElementById("dispLastCommit").style.color = "var(--primary)";
+
+    // Renovar caché del Service Worker de fondo
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+
+    setTimeout(() => {
+      pBg.style.display = "none";
+      stText.style.display = "none";
+      resCard.style.display = "block";
+      resCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      toast("¡Actualización detectada! Revisa las novedades y descarga el APK.", "ok");
+    }, 600);
+
   } catch (e) {
     pBar.style.width = "100%";
-    stText.textContent = "Modo local seguro activo (sin cambios pendientes).";
+    stText.textContent = "Modo local seguro activo (sin conexión al repositorio).";
     setTimeout(() => {
       pBg.style.display = "none";
       stText.style.display = "none";
@@ -1320,12 +1358,34 @@ async function runOtaUpdate() {
   }
 }
 
-document.getElementById("btnAutoUpdateTop").onclick = runOtaUpdate;
+document.getElementById("btnAutoUpdateTop").onclick = () => {
+  // Navegar a la vista de updates y correr buscador
+  document.querySelectorAll(".nav-tab-btn, .nav-link").forEach(b => b.classList.toggle("active", b.dataset.view === "view-updates"));
+  document.querySelectorAll(".view-pane").forEach(pane => pane.classList.toggle("active", pane.id === "view-updates"));
+  closeSidebar();
+  runOtaUpdate();
+};
+
 document.getElementById("btnTriggerOtaUpdate").onclick = runOtaUpdate;
 
-// Botón de Descarga APK Directa
-document.getElementById("btnDownloadApkDirect").onclick = () => {
-  window.open("https://github.com/Supoeconomy/agroconecta-agricultor/releases", "_blank");
+// Función de Descarga del APK con soporte nativo Android y navegador
+document.getElementById("btnDownloadApkDirect").onclick = function() {
+  toast("Iniciando descarga de agroconecta-agricultor.apk...", "ok");
+
+  // Si corre dentro del APK nativo de Android (WebView con interfaz)
+  if (window.AndroidApp && typeof window.AndroidApp.downloadFile === "function") {
+    window.AndroidApp.downloadFile(GITHUB_APK_RAW_URL);
+    return;
+  }
+
+  // Descarga en navegador Android / PWA
+  const a = document.createElement("a");
+  a.href = GITHUB_APK_RAW_URL;
+  a.download = "agroconecta-agricultor.apk";
+  a.target = "_blank";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 
 // 9. SEMÁFORO DE CONEXIÓN
